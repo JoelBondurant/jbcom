@@ -30,9 +30,19 @@
 				</ul>
 		</div>
 		<br/>
-		<div id="bitcoin_info" style="color: #888; font-size: 1.3vh; float: left;"></div><br/>
-		<div id="geo_info" style="color: #888; font-size: 1.3vh; float: left;"></div><br/>
-		<div id="trace_info" style="color: #888; font-size: 1.3vh; float: left;"></div><br/>
+		<style>
+			.smoltxt {
+				color: #888;
+				font-size: 1.3vh;
+				float: left;
+			}
+		</style>
+		<div style="display:grid; grid-template-columns: 1fr;">
+			<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
+			<div id="geo_info" class="smoltxt">&nbsp;</div>
+			<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
+			<div id="trace_info" class="smoltxt">&nbsp;</div>
+		</div>
 	</div>
 <br/>
 </body>
@@ -65,11 +75,12 @@
 </script>
 <script>
 	function showGeo(position) {
-		const geoInfo = 'Latitude, Longitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
+		const geoInfo = 'Latitude, Loingitude (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
 		document.getElementById('geo_info').innerHTML = geoInfo;
 	}
 	function geoMe() {
 		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
 			navigator.geolocation.watchPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
 		}
 	}
