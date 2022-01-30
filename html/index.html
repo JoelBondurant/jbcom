@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Joel Bondurant</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="img/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+	<div id="backstuff" style="height: 100%; width: 100%;">
+		<img src="img/joel.jpg" alt="Joel Bondurant" style="width: 16vh; height: auto; display: block; margin: auto; clip-path: circle(); border: max(0.8vw,0.8vw); border-radius: 16vh; border-style: double; border-color: #096909;">
+		<div style="display: block; text-align: center; margin-left: 10px; margin-right: auto;">
+			<a href="https://www.howtopronounce.com/joel">Joel</a>&nbsp;<a href="https://www.howtopronounce.com/bondurant">Bondurant</a><br/>
+			Nevada / Texas<br/>
+			<a href="resume">Resume</a><br/>
+			<a href="calendly">Calendly</a><br/>
+			<br/>
+			<h4>Projects:</h4>
+				<ul style="list-style-type: none; display: table; margin: 0 auto; text-align: left;">
+					<li><a href="https://sqlplot.com">SqlPlot</a></li>
+					<li><a href="https://github.com/joelbondurant">GitHub</a></li>
+				</ul><br/>
+			<h4>Media:</h4>
+				<ul style="list-style-type: none; display: table; margin: 0 auto; text-align: left;">
+					<li><a href="photos">Photos</a></li>
+					<li><a href="https://linkedin.com/in/joelbondurant">LinkedIn</a></li>
+					<li><a href="https://stackoverflow.com/users/451170/joelbondurant">StackOverflow</a></li>
+					<li><a href="https://tiktok.com/@joelbondurant0">TikTok</a></li>
+					<li><a href="https://twitter.com/joelbondurant0">Twitter</a></li>
+				</ul>
+		</div>
+		<br/>
+		<div id="bitcoin_info" style="color: #888; font-size: 1.3vh; float: left;"></div><br/>
+		<div id="geo_info" style="color: #888; font-size: 1.3vh; float: left;"></div><br/>
+		<div id="trace_info" style="color: #888; font-size: 1.3vh; float: left;"></div><br/>
+	</div>
+<br/>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js" integrity="sha512-yNJzAsg5JyP91u+sLHlUDULMBd3hmEiVkYeeN1cQBKaLZ7EyT6oH2u5THNIRM2Fu6VKcZJv+F/QAp1h/qzy9Ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.waves.min.js" integrity="sha512-OctlSjhUW90StGtQUwB1125p1fNP4wKyCxJsNA4VNhlXEyP8ks0KAp2Cmesl53AWpo7rQQeWhnxa4v9ehQjetw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+	VANTA.WAVES({
+		el: '#backstuff',
+		mouseControls: true,
+		touchControls: true,
+		gyroControls: true,
+		minHeight: 40.00,
+		minWidth: 40.00,
+		scale: 1.00,
+		scaleMobile: 1.00,
+		color: 0x0,
+		shininess: 40.00,
+		waveSpeed: 1.0,
+		zoom: 0.90
+	})
+</script>
+<script>
+	async function traceMe() {
+		const traceUrl = 'https://www.cloudflare.com/cdn-cgi/trace';
+		var traceInfo = await (await fetch(traceUrl)).text();
+		traceInfo = traceInfo.split('\n').slice(2, -5).join('<br/>');
+		document.getElementById('trace_info').innerHTML = traceInfo;
+	}
+	traceMe();
+</script>
+<script>
+	function showGeo(position) {
+		const geoInfo = 'Latitude, Longitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
+		document.getElementById('geo_info').innerHTML = geoInfo;
+	}
+	function geoMe() {
+		if (navigator.geolocation) {
+			navigator.geolocation.watchPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
+		}
+	}
+	geoMe();
+</script>
+<script>
+	var priorsIndex = 0;
+	const priors = [];
+	function showBitcoinPrice(price) {
+		if (isNaN(price)) {
+			return;
+		}
+		priors[priorsIndex] = price;
+		priorsIndex += 1;
+		priorsIndex %= 32;
+		const priorAvg = priors.map((x,y,z)=>x/z.length).reduce((x,y)=>x+y);
+		var msg = '<span style="color: #f7931a;">Bitcoin: </span>'
+		const gap = price/1000;
+		if (price > priorAvg + gap) {
+			msg += '<span style="color: #0f0;">'
+		} else if (price < priorAvg - gap) {
+			msg += '<span style="color: #f00;">'
+		} else {
+			msg += '<span>'
+		}
+		msg += Intl.NumberFormat('en-US', {'currency': 'USD', 'style': 'currency'}).format(price);
+		msg += '</span>'
+		document.getElementById('bitcoin_info').innerHTML = msg;
+	}
+	async function streamBitcoinPrice() {
+		var ws = new WebSocket('wss://ws.bitstamp.net');
+		ws.onmessage = (resp) => {
+			const evt = JSON.parse(resp.data);
+			if (evt['event'] == 'bts:request_reconnect') {
+				streamBitcoinPrice();
+				return;
+			}
+			const price = parseFloat(JSON.stringify(evt['data']['price']));
+			showBitcoinPrice(price);
+		}
+		ws.onclose = () => {
+			console.log('Bitcoin info socket closed.')
+			streamBitcoinPrice();
+		}
+		ws.onopen = async () => {
+			const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
+			const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
+			showBitcoinPrice(price);
+			const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
+			ws.send(JSON.stringify(subMsg));
+		}
+		return ws;
+	}
+	streamBitcoinPrice();
+</script>
+</html>

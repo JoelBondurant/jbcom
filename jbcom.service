@@ -1,0 +1,16 @@
+[Unit]
+Description=jbcom
+
+[Service]
+User=ubuntu
+Group=ubuntu
+Type=simple
+WorkingDirectory=/home/ubuntu/jbcom
+ExecStart=uvicorn jbcom:app --host=0.0.0.0 --port 8944
+Restart=always
+RestartSec=8
+TimeoutSec=8
+
+
+[Install]
+WantedBy=multi-user.target
