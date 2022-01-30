@@ -5,19 +5,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="img/favicon.ico">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
-	<script src="js/photos.js" integrity="sha512-eEKej5PrwdQmvgJk4IeAmd8BxN3Bmn441JS7yGTvJGIgasbfseVIO3NRBfWAwTxH77uxk32R10aGJgaF19OhcQ==" crossorigin="anonymous"></script>
+	<script src="js/photos.js"></script>
 </head>
 <body>
 	<div style="display: grid; grid-template-columns: 5fr 90fr 5fr;">
 		<div onclick="photos.navigateLeft();" style="width: 100%;"></div>
-		<div id="photo_grid"></div>
+		<div id="photos"></div>
 		<div onclick="photos.injectPhotos();"></div>
 	</div>
 </body>
 <script>
-photos.bind('photo_grid');
-photos.setNumber(42);
-photos.injectPhotos();
-photos.addNavigationListeners();
+photos.install('photos', 42);
 </script>
 </html>

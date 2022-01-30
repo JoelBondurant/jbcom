@@ -92,6 +92,13 @@ const photos = (() => {
 		});
 	}
 
+	function install(uid, n) {
+		bind(uid);
+		setNumber(n);
+		injectPhotos();
+		addNavigationListeners();
+	}
+
 	return {
 		'bind': bind,
 		'setNumber': setNumber,
@@ -99,6 +106,7 @@ const photos = (() => {
 		'injectPhotos': injectPhotos,
 		'navigateRight': navigateRight,
 		'navigateLeft': navigateLeft,
-		'addNavigationListeners': addNavigationListeners
+		'addNavigationListeners': addNavigationListeners,
+		'install': install
 	}
 })();
