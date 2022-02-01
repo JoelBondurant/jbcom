@@ -23,10 +23,7 @@
 			<h4>Media:</h4>
 				<ul style="list-style-type: none; display: table; margin: 0 auto; text-align: left;">
 					<li><a href="photos">Photos</a></li>
-					<li><a href="https://linkedin.com/in/joelbondurant">LinkedIn</a></li>
-					<li><a href="https://stackoverflow.com/users/451170/joelbondurant">StackOverflow</a></li>
-					<li><a href="https://tiktok.com/@joelbondurant0">TikTok</a></li>
-					<li><a href="https://twitter.com/joelbondurant0">Twitter</a></li>
+					<li><a href="notes">Notes</a></li>
 				</ul>
 		</div>
 		<br/>
@@ -37,12 +34,15 @@
 				float: left;
 			}
 		</style>
-		<div style="display:grid; grid-template-columns: 1fr;">
-			<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
-			<div id="geo_info" class="smoltxt">&nbsp;</div>
-			<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
-			<div id="trace_info" class="smoltxt">&nbsp;</div>
-		</div>
+		<div style="display:grid; grid-template-columns: 2fr 10fr;">
+			<div style="display:grid; grid-template-columns: 1fr; min-width: 200px;">
+				<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
+				<div id="geo_info" class="smoltxt">&nbsp;</div>
+				<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
+				<div id="trace_info" class="smoltxt">&nbsp;</div>
+			</div>
+			<div id="baby"></div>
+		<div>
 	</div>
 <br/>
 </body>
@@ -135,5 +135,14 @@
 		return ws;
 	}
 	streamBitcoinPrice();
+</script>
+<script>
+function injectDancingBaby() {
+	const x = Math.max(100, Math.floor(Math.random() * window.screen.availWidth)-800);
+	const baby = document.querySelector('#baby');
+	baby.innerHTML = `<img src="img/baby.gif" style="position: absolute; right: ${x}px;">`;
+	setTimeout(injectDancingBaby, 2000);
+}
+injectDancingBaby();
 </script>
 </html>
