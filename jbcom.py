@@ -25,6 +25,10 @@ async def get_resume(req: Request):
 async def get_photos(req: Request):
 	return templates.TemplateResponse('photos.html', {'request': req})
 
+@app.get('/notes', response_class=HTMLResponse)
+async def get_notes(req: Request):
+	return templates.TemplateResponse('notes.html', {'request': req})
+
 @app.get('/calendly', response_class=HTMLResponse)
 async def get_calendly(req: Request):
 	return templates.TemplateResponse('calendly.html', {'request': req})
