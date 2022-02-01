@@ -27,10 +27,10 @@
 			<input id="encryption_key" type="text" onchange="setEncryptionKey();">
 			<label for="is_leader">is_leader:</label>
 			<input id="is_leader" type="checkbox" onchange="setIsLeader();">
-			<label for="web_rtc_leader_sdp" onclick="copyProperty('#web_rtc_leader_sdp', 'value');">web_rtc_leader_sdp:</label>
-			<input id="web_rtc_leader_sdp" type="text" onchange="setWebRTCFollowerSDP();">
-			<label for="web_rtc_follower_sdp" onclick="copyProperty('#web_rtc_follower_sdp', 'value');">web_rtc_follower_sdp:</label>
-			<input id="web_rtc_follower_sdp" type="text" onchange="setRemoteDescription();">
+			<label for="webrtc_leader_sdp" onclick="copyProperty('#webrtc_leader_sdp', 'value');">webrtc_leader_sdp:</label>
+			<input id="webrtc_leader_sdp" type="text" onchange="setWebRTCFollowerSDP();">
+			<label for="webrtc_follower_sdp" onclick="copyProperty('#webrtc_follower_sdp', 'value');">webrtc_follower_sdp:</label>
+			<input id="webrtc_follower_sdp" type="text" onchange="setRemoteDescription();">
 			<label for="note">note:</label>
 			<input id="note" type="textarea" onchange="setNote();">
 		</div>
@@ -43,11 +43,11 @@ function init() {
 	document.querySelector('#encryption_key').value = encryptionKey;
 	document.querySelector('#is_leader').checked = isLeader;
 	if (isLeader) {
-		document.querySelector('#web_rtc_leader_sdp').disabled = true;
-		document.querySelector('#web_rtc_follower_sdp').disabled = false;
+		document.querySelector('#webrtc_leader_sdp').disabled = true;
+		document.querySelector('#webrtc_follower_sdp').disabled = false;
 	} else {
-		document.querySelector('#web_rtc_leader_sdp').disabled = false;
-		document.querySelector('#web_rtc_follower_sdp').disabled = true;
+		document.querySelector('#webrtc_leader_sdp').disabled = false;
+		document.querySelector('#webrtc_follower_sdp').disabled = true;
 	}
 	if (isLeader) {
 		setTimeout(setWebRTCLeaderSDP, 100);
@@ -58,11 +58,11 @@ function setIsLeader() {
 	const isLeader = document.querySelector('#is_leader').checked;
 	localStorage.setItem('is_leader', isLeader);
 	if (isLeader) {
-		document.querySelector('#web_rtc_leader_sdp').disabled = true;
-		document.querySelector('#web_rtc_follower_sdp').disabled = false;
+		document.querySelector('#webrtc_leader_sdp').disabled = true;
+		document.querySelector('#webrtc_follower_sdp').disabled = false;
 	} else {
-		document.querySelector('#web_rtc_leader_sdp').disabled = false;
-		document.querySelector('#web_rtc_follower_sdp').disabled = true;
+		document.querySelector('#webrtc_leader_sdp').disabled = false;
+		document.querySelector('#webrtc_follower_sdp').disabled = true;
 	}
 }
 function setEncryptionKey() {
@@ -71,7 +71,7 @@ function setEncryptionKey() {
 var rtc = new RTCPeerConnection();
 function setRemoteDescription() {
 	try {
-		const rd = JSON.parse(document.querySelector('#web_rtc_follower_sdp').value);
+		const rd = JSON.parse(document.querySelector('#webrtc_follower_sdp').value);
 		rtc.setRemoteDescription(rd);
 	} catch (ex) {
 		console.log(ex);
@@ -84,19 +84,19 @@ function setWebRTCLeaderSDP() {
 	dc.onopen = (evt) => console.log('Connection opened!');
 	rtc.onicecandidate = (evt) => {
 		const sdp = JSON.stringify(rtc.localDescription);
-		document.querySelector('#web_rtc_leader_sdp').value = sdp;
-		localStorage.setItem('web_rtc_leader_sdp', sdp);
+		document.querySelector('#webrtc_leader_sdp').value = sdp;
+		localStorage.setItem('webrtc_leader_sdp', sdp);
 	}
 	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('success'));
 }
 function setWebRTCFollowerSDP() {
-	const leaderSDP = document.querySelector('#web_rtc_leader_sdp').value;
+	const leaderSDP = document.querySelector('#webrtc_leader_sdp').value;
 	try {
 		const offer = JSON.parse(leaderSDP);
 		rtc.onicecandidate = (evt) => {
 			const sdp = JSON.stringify(rtc.localDescription);
-			document.querySelector('#web_rtc_follower_sdp').value = sdp;
-			localStorage.setItem('web_rtc_follower_sdp', sdp);
+			document.querySelector('#webrtc_follower_sdp').value = sdp;
+			localStorage.setItem('webrtc_follower_sdp', sdp);
 		}
 		rtc.ondatachannel = (evt) => {
 			rtc.dc = evt.channel;
@@ -107,8 +107,8 @@ function setWebRTCFollowerSDP() {
 		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('answered'));
 	} catch (ex) {
 		console.log(ex);
-		document.querySelector('#web_rtc_follower_sdp').value = '';
-		localStorage.setItem('web_rtc_follower_sdp', '');
+		document.querySelector('#webrtc_follower_sdp').value = '';
+		localStorage.setItem('webrtc_follower_sdp', '');
 	}
 }
 function setNote() {
