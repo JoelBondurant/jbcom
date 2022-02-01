@@ -139,7 +139,10 @@
 <script>
 function injectDancingBaby() {
 	/* Make the web great again. */
-	const x = Math.min(window.innerWidth/2, Math.floor(Math.random() * window.innerWidth));
+	if (window.innerWidth < 1200) {
+		return;
+	}
+	const x = Math.min(800, Math.min(window.innerWidth/2, Math.floor(Math.random() * window.innerWidth)));
 	const baby = document.querySelector('#baby');
 	baby.innerHTML = `<img src="img/baby.gif" style="position: absolute; right: ${x}px; z-index: -1;">`;
 	setTimeout(injectDancingBaby, 2000);
