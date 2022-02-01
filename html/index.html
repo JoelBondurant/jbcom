@@ -34,7 +34,7 @@
 				float: left;
 			}
 		</style>
-		<div style="display:grid; grid-template-columns: 2fr 10fr;">
+		<div style="display:grid; grid-template-columns: 1fr 1fr;">
 			<div style="display:grid; grid-template-columns: 1fr; min-width: 200px;">
 				<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
 				<div id="geo_info" class="smoltxt">&nbsp;</div>
@@ -126,11 +126,11 @@
 			streamBitcoinPrice();
 		}
 		ws.onopen = async () => {
+			const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
+			ws.send(JSON.stringify(subMsg));
 			const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
 			const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
 			showBitcoinPrice(price);
-			const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
-			ws.send(JSON.stringify(subMsg));
 		}
 		return ws;
 	}
@@ -138,9 +138,10 @@
 </script>
 <script>
 function injectDancingBaby() {
-	const x = Math.max(100, Math.floor(Math.random() * window.screen.availWidth)-800);
+	/* Make the web great again. */
+	const x = Math.min(window.innerWidth/2, Math.floor(Math.random() * window.innerWidth));
 	const baby = document.querySelector('#baby');
-	baby.innerHTML = `<img src="img/baby.gif" style="position: absolute; right: ${x}px;">`;
+	baby.innerHTML = `<img src="img/baby.gif" style="position: absolute; right: ${x}px; z-index: -1;">`;
 	setTimeout(injectDancingBaby, 2000);
 }
 injectDancingBaby();
