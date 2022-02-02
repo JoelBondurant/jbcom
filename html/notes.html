@@ -31,12 +31,61 @@
 			<input id="webrtc_leader_sdp" type="text" onchange="setWebRTCFollowerSDP();">
 			<label for="webrtc_follower_sdp" onclick="copyProperty('#webrtc_follower_sdp', 'value');">webrtc_follower_sdp:</label>
 			<input id="webrtc_follower_sdp" type="text" onchange="setRemoteDescription();">
+			<label for="name">name:</label>
+			<input id="name" type="text">
+			<div></div>
+			<div style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+				<button id="save" onclick="saveNote();">save</button>
+				<button id="load" onclick="loadNote();">load</button>
+				<button id="delete" onclick="deleteNote();">delete</button>
+			</div>
 			<label for="note">note:</label>
-			<input id="note" type="textarea" style="height: 60vh;" onchange="setNote();">
+			<textarea id="note" style="height: 60vh;"></textarea>
 		</div>
 	</div>
 </body>
 <script>
+function getNoteList() {
+	var noteList = JSON.parse(localStorage.getItem('note_list'));
+	if (noteList === null) {
+		noteList = [];
+	}
+	return noteList;
+}
+function setNoteList(noteList) {
+	var modifiedNoteList  = Array.from(new Set(noteList)).sort();
+	localStorage.setItem('note_list', JSON.stringify(modifiedNoteList));
+	return modifiedNoteList;
+}
+function saveNote() {
+	const name = document.querySelector('#name').value;
+	const note = document.querySelector('#note').value;
+	setNoteList(getNoteList().concat(name));
+	localStorage.setItem('note_' + name, note);
+}
+function deleteNote() {
+	const oname = document.querySelector('#name');
+	const name = oname.value;
+	if (name === null || name == '') {
+		return;
+	}
+	localStorage.removeItem('note_' + name);
+	oname.value = '';
+	setNoteList(getNoteList().filter((x) => x != name));
+	document.querySelector('#note').value = '';
+}
+function loadNote() {
+	const oname = document.querySelector('#name');
+	const name = oname.value;
+	if (name === null || name == '') {
+		return;
+	}
+	const note = localStorage.getItem('note_' + name);
+	if (note === null || note == '') {
+		return;
+	}
+	document.querySelector('#note').value = note;
+}
 function init() {
 	const encryptionKey = localStorage.getItem('encryption_key') || '';
 	const isLeader = (localStorage.getItem('is_leader') == 'true');
@@ -50,7 +99,7 @@ function init() {
 		document.querySelector('#webrtc_follower_sdp').disabled = true;
 	}
 	if (isLeader) {
-		setTimeout(setWebRTCLeaderSDP, 100);
+		setTimeout(setWebRTCLeaderSDP, 300);
 	}
 }
 init();
@@ -78,10 +127,11 @@ function setRemoteDescription() {
 	}
 }
 function setWebRTCLeaderSDP() {
+	const sdp0 = localStorage.getItem('webrtc_leader_sdp');
 	const dc = rtc.createDataChannel('channel');
 	rtc.dc = dc;
 	dc.onmessage = (evt) => console.log('Message: ' + evt.data);
-	dc.onopen = (evt) => console.log('Connection opened!');
+	dc.onopen = (evt) => console.log('RTC leader connection opened.');
 	rtc.onicecandidate = (evt) => {
 		const sdp = JSON.stringify(rtc.localDescription);
 		document.querySelector('#webrtc_leader_sdp').value = sdp;
@@ -90,12 +140,14 @@ function setWebRTCLeaderSDP() {
 	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('success'));
 }
 function setWebRTCFollowerSDP() {
-	const leaderSDP = document.querySelector('#webrtc_leader_sdp').value;
+	const lsdp = document.querySelector('#webrtc_leader_sdp');
+	const fsdp = document.querySelector('#webrtc_follower_sdp');
+	const leaderSDP = lsdp.value;
 	try {
 		const offer = JSON.parse(leaderSDP);
 		rtc.onicecandidate = (evt) => {
 			const sdp = JSON.stringify(rtc.localDescription);
-			document.querySelector('#webrtc_follower_sdp').value = sdp;
+			fsdp.value = sdp;
 			localStorage.setItem('webrtc_follower_sdp', sdp);
 		}
 		rtc.ondatachannel = (evt) => {
@@ -107,13 +159,18 @@ function setWebRTCFollowerSDP() {
 		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('answered'));
 	} catch (ex) {
 		console.log(ex);
-		document.querySelector('#webrtc_follower_sdp').value = '';
+		fsdp.value = '';
 		localStorage.setItem('webrtc_follower_sdp', '');
 	}
 }
+function setName() {
+	const name = document.querySelector('#name').value;
+	const note = localStorage.getItem('note_' + name);
+	rtc.dc.send(note);
+}
 function setNote() {
-	const anote = document.querySelector('#note').value;
-	rtc.dc.send(anote);
+	const note = document.querySelector('#note').value;
+	rtc.dc.send(note);
 }
 </script>
 </html>

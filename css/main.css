@@ -45,8 +45,13 @@ a {
 button {
 	background-color: #000;
 	border: 1px solid #141;
+	color: #eee;
+	display: inline-block;
+	min-height: 2em;
+	width: 100%;
 	padding: 0px;
 	margin: 0px;
+	font-size: 1em;
 }
 a:hover, a:active, button:hover, button:active {
 	color: #09ff09;
@@ -54,20 +59,19 @@ a:hover, a:active, button:hover, button:active {
 	transition-duration: 0.5s;
 	transition-timing-function: ease-in;
 }
-a:hover, a:active, button:hover, button:active {
+a:hover, a:active, button:hover,button:active {
 	background-color: #077707;
 	transition-property: background-color;
 	transition-duration: 0.5s;
 	transition-timing-function: linear;
 }
-input[type=text], input[type=password], input[type=textarea] {
+input[type=text], input[type=password], textarea {
 	background-color: #333;
 	color: #eee;
 	font-size: 1em;
 	padding: 4px 12px;
 	height: 1.2em;
 	min-width: 12vw;
-	max-width: 64vw;
 }
 input[type=text]:disabled, input[type=password]:disabled, input[type=textarea]:disabled {
 	background-color: #111;
