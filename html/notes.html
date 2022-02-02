@@ -34,9 +34,9 @@
 			<label for="name">name:</label>
 			<input id="name" type="text">
 			<div></div>
-			<div style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
-				<button id="save" onclick="saveNote();">save</button>
+			<div style="display: grid; grid-template-columns: repeat(3, 1fr);">
 				<button id="load" onclick="loadNote();">load</button>
+				<button id="save" onclick="saveNote();">save</button>
 				<button id="delete" onclick="deleteNote();">delete</button>
 			</div>
 			<label for="note">note:</label>
@@ -46,14 +46,14 @@
 </body>
 <script>
 function getNoteList() {
-	var noteList = JSON.parse(localStorage.getItem('note_list'));
+	let noteList = JSON.parse(localStorage.getItem('note_list'));
 	if (noteList === null) {
 		noteList = [];
 	}
 	return noteList;
 }
 function setNoteList(noteList) {
-	var modifiedNoteList  = Array.from(new Set(noteList)).sort();
+	let modifiedNoteList  = Array.from(new Set(noteList.filter((x) => (x != '')))).sort();
 	localStorage.setItem('note_list', JSON.stringify(modifiedNoteList));
 	return modifiedNoteList;
 }
@@ -77,11 +77,13 @@ function deleteNote() {
 function loadNote() {
 	const oname = document.querySelector('#name');
 	const name = oname.value;
+	var note;
 	if (name === null || name == '') {
-		return;
+		note = JSON.parse(localStorage.getItem('note_list')).join('\n');
+	} else {
+		note = localStorage.getItem('note_' + name);
 	}
-	const note = localStorage.getItem('note_' + name);
-	if (note === null || note == '') {
+	if (note === null) {
 		return;
 	}
 	document.querySelector('#note').value = note;
@@ -117,7 +119,7 @@ function setIsLeader() {
 function setEncryptionKey() {
 	localStorage.setItem('encryption_key', document.querySelector('#encryption_key').value);
 }
-var rtc = new RTCPeerConnection();
+const rtc = new RTCPeerConnection();
 function setRemoteDescription() {
 	try {
 		const rd = JSON.parse(document.querySelector('#webrtc_follower_sdp').value);

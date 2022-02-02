@@ -1,10 +1,10 @@
 const photos = (() => {
 
-	var numPhotos = 0;
-	var gridId = 'NULL';
-	var photoIndex = 0;
-	var touchStartX = 0;
-	var touchEndX = 0;
+	let numPhotos = 0;
+	let gridId = 'NULL';
+	let photoIndex = 0;
+	let touchStartX = 0;
+	let touchEndX = 0;
 
 	function bind(uid) {
 		gridId = uid;

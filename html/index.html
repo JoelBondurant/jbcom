@@ -67,7 +67,7 @@
 <script>
 	async function traceMe() {
 		const traceUrl = 'https://www.cloudflare.com/cdn-cgi/trace';
-		var traceInfo = await (await fetch(traceUrl)).text();
+		let traceInfo = await (await fetch(traceUrl)).text();
 		traceInfo = traceInfo.split('\n').slice(2, -5).join('<br/>');
 		document.getElementById('trace_info').innerHTML = traceInfo;
 	}
@@ -87,7 +87,7 @@
 	geoMe();
 </script>
 <script>
-	var priorsIndex = 0;
+	let priorsIndex = 0;
 	const priors = [];
 	function showBitcoinPrice(price) {
 		if (isNaN(price)) {
@@ -97,7 +97,7 @@
 		priorsIndex += 1;
 		priorsIndex %= 32;
 		const priorAvg = priors.map((x,y,z)=>x/z.length).reduce((x,y)=>x+y);
-		var msg = '<span style="color: #f7931a;">Bitcoin: </span>'
+		let msg = '<span style="color: #f7931a;">Bitcoin: </span>'
 		const gap = price/1000;
 		if (price > priorAvg + gap) {
 			msg += '<span style="color: #0f0;">'
@@ -111,7 +111,7 @@
 		document.getElementById('bitcoin_info').innerHTML = msg;
 	}
 	async function streamBitcoinPrice() {
-		var ws = new WebSocket('wss://ws.bitstamp.net');
+		const ws = new WebSocket('wss://ws.bitstamp.net');
 		ws.onmessage = (resp) => {
 			const evt = JSON.parse(resp.data);
 			if (evt['event'] == 'bts:request_reconnect') {
