@@ -21,10 +21,20 @@ html {
 	scroll-behavior: smooth;
 	scrollbar-gutter: stable;
 }
-html, body {
+body {
 	height: 98%;
 	color: #eee;
 	background-color: #000;
+}
+@media (max-width: 600px) and (max-height: 600px) {
+	body {
+		font-size: 1.8vh;
+	}
+}
+@media (min-width: 600px) and (min-height: 600px) {
+	body {
+		font-size: 2.4vh;
+	}
 }
 img {
 	opacity: 1.0;
@@ -50,13 +60,31 @@ a:hover, a:active, button:hover, button:active {
 	transition-duration: 0.5s;
 	transition-timing-function: linear;
 }
-@media (max-width: 600px) and (max-height: 600px) {
-	body {
-		font-size: 1.8vh;
-	}
+input[type=text], input[type=password], input[type=textarea] {
+	background-color: #333;
+	color: #eee;
+	font-size: 1em;
+	padding: 4px 12px;
+	height: 1.2em;
+	min-width: 12vw;
+	max-width: 64vw;
 }
-@media (min-width: 600px) and (min-height: 600px) {
-	body {
-		font-size: 2.4vh;
-	}
+input[type=text]:disabled, input[type=password]:disabled, input[type=textarea]:disabled {
+	background-color: #111;
+	color: #aaa;
+}
+input[type=checkbox] {
+	appearance: none;
+	border-radius: 4px;
+	border: 2px solid #ccc;
+	cursor: pointer;
+	height: 18px;
+	width: 18px;
+	content: "";
+	background-color: #222;
+	color: #ccc;
+}
+input[type=checkbox]:checked {
+	background: conic-gradient(#fff 0.25turn, #000 0.25turn 0.5turn, #fff 0.5turn 0.75turn, #000 0.75turn) top left / 25% 25% repeat;
+	border: 2px solid #ccc;
 }
