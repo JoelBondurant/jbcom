@@ -5,6 +5,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="img/favicon.ico">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<style>
+		.smoltxt {
+			color: #888;
+			font-size: 1.3vh;
+			float: left;
+		}
+	</style>
 </head>
 <body>
 	<div id="backstuff" style="height: 100%; width: 100%;">
@@ -27,13 +34,6 @@
 				</ul>
 		</div>
 		<br/>
-		<style>
-			.smoltxt {
-				color: #888;
-				font-size: 1.3vh;
-				float: left;
-			}
-		</style>
 		<div style="display:grid; grid-template-columns: auto 1fr;">
 			<div style="display:grid; grid-template-columns: 1fr; min-width: 200px;">
 				<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
@@ -42,9 +42,9 @@
 				<div id="trace_info" class="smoltxt">&nbsp;</div>
 			</div>
 			<div>
-				<img id="baby" src="img/baby.gif" style="position: absolute; z-index: -1; display: none;">
+				<img id="baby" src="img/baby.gif" alt="dancing baby" style="position: absolute; z-index: -1; display: none;">
 			</div>
-		<div>
+		</div>
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js" integrity="sha512-yNJzAsg5JyP91u+sLHlUDULMBd3hmEiVkYeeN1cQBKaLZ7EyT6oH2u5THNIRM2Fu6VKcZJv+F/QAp1h/qzy9Ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.waves.min.js" integrity="sha512-OctlSjhUW90StGtQUwB1125p1fNP4wKyCxJsNA4VNhlXEyP8ks0KAp2Cmesl53AWpo7rQQeWhnxa4v9ehQjetw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -137,20 +137,20 @@
 		streamBitcoinPrice();
 	</script>
 	<script>
-	function injectDancingBaby() {
-		/* Make the web great again. */
-		const baby = document.querySelector('#baby');
-		if (window.innerWidth < 1200) {
-			baby.style.display = 'none';
+		function injectDancingBaby() {
+			/* Make the web great again. */
+			const baby = document.querySelector('#baby');
+			if (window.innerWidth < 1200) {
+				baby.style.display = 'none';
+				setTimeout(injectDancingBaby, 2000);
+				return;
+			}
+			const x = Math.min(600, Math.floor(Math.random() * window.innerWidth / 2.0));
+			baby.style.right = `${x}px`;
+			baby.style.display = 'inline';
 			setTimeout(injectDancingBaby, 2000);
-			return;
 		}
-		const x = Math.min(600, Math.floor(Math.random() * window.innerWidth / 2.0));
-		baby.style.right = `${x}px`;
-		baby.style.display = 'inline';
-		setTimeout(injectDancingBaby, 2000);
-	}
-	injectDancingBaby();
+		injectDancingBaby();
 	</script>
 </body>
 </html>
