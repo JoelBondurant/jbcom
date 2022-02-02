@@ -41,114 +41,116 @@
 				<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
 				<div id="trace_info" class="smoltxt">&nbsp;</div>
 			</div>
-			<div id="baby"></div>
+			<div>
+				<img id="baby" src="img/baby.gif" style="position: absolute; z-index: -1; display: none;">
+			</div>
 		<div>
 	</div>
-<br/>
-</body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js" integrity="sha512-yNJzAsg5JyP91u+sLHlUDULMBd3hmEiVkYeeN1cQBKaLZ7EyT6oH2u5THNIRM2Fu6VKcZJv+F/QAp1h/qzy9Ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.waves.min.js" integrity="sha512-OctlSjhUW90StGtQUwB1125p1fNP4wKyCxJsNA4VNhlXEyP8ks0KAp2Cmesl53AWpo7rQQeWhnxa4v9ehQjetw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
-	VANTA.WAVES({
-		el: '#backstuff',
-		mouseControls: true,
-		touchControls: true,
-		gyroControls: true,
-		minHeight: 40.00,
-		minWidth: 40.00,
-		scale: 1.00,
-		scaleMobile: 1.00,
-		color: 0x0,
-		shininess: 40.00,
-		waveSpeed: 1.0,
-		zoom: 0.90
-	})
-</script>
-<script>
-	async function traceMe() {
-		const traceUrl = 'https://www.cloudflare.com/cdn-cgi/trace';
-		let traceInfo = await (await fetch(traceUrl)).text();
-		traceInfo = traceInfo.split('\n').slice(2, -5).join('<br/>');
-		document.getElementById('trace_info').innerHTML = traceInfo;
-	}
-	traceMe();
-</script>
-<script>
-	function showGeo(position) {
-		const geoInfo = 'Latitude, Loingitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
-		document.getElementById('geo_info').innerHTML = geoInfo;
-	}
-	function geoMe() {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
-			navigator.geolocation.watchPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js" integrity="sha512-yNJzAsg5JyP91u+sLHlUDULMBd3hmEiVkYeeN1cQBKaLZ7EyT6oH2u5THNIRM2Fu6VKcZJv+F/QAp1h/qzy9Ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.waves.min.js" integrity="sha512-OctlSjhUW90StGtQUwB1125p1fNP4wKyCxJsNA4VNhlXEyP8ks0KAp2Cmesl53AWpo7rQQeWhnxa4v9ehQjetw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script>
+		VANTA.WAVES({
+			el: '#backstuff',
+			mouseControls: true,
+			touchControls: true,
+			gyroControls: false,
+			minHeight: 40.00,
+			minWidth: 40.00,
+			scale: 1.00,
+			scaleMobile: 1.00,
+			color: 0x0,
+			shininess: 40.00,
+			waveSpeed: 1.0,
+			zoom: 0.90
+		})
+	</script>
+	<script>
+		async function traceMe() {
+			const traceUrl = 'https://www.cloudflare.com/cdn-cgi/trace';
+			let traceInfo = await (await fetch(traceUrl)).text();
+			traceInfo = traceInfo.split('\n').slice(2, -5).join('<br/>');
+			document.getElementById('trace_info').innerHTML = traceInfo;
 		}
-	}
-	geoMe();
-</script>
-<script>
-	let priorsIndex = 0;
-	const priors = [];
-	function showBitcoinPrice(price) {
-		if (isNaN(price)) {
-			return;
+		traceMe();
+	</script>
+	<script>
+		function showGeo(position) {
+			const geoInfo = 'Latitude, Loingitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
+			document.getElementById('geo_info').innerHTML = geoInfo;
 		}
-		priors[priorsIndex] = price;
-		priorsIndex += 1;
-		priorsIndex %= 32;
-		const priorAvg = priors.map((x,y,z)=>x/z.length).reduce((x,y)=>x+y);
-		let msg = '<span style="color: #f7931a;">Bitcoin: </span>'
-		const gap = price/1000;
-		if (price > priorAvg + gap) {
-			msg += '<span style="color: #0f0;">'
-		} else if (price < priorAvg - gap) {
-			msg += '<span style="color: #f00;">'
-		} else {
-			msg += '<span>'
+		function geoMe() {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
+				navigator.geolocation.watchPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
+			}
 		}
-		msg += Intl.NumberFormat('en-US', {'currency': 'USD', 'style': 'currency'}).format(price);
-		msg += '</span>'
-		document.getElementById('bitcoin_info').innerHTML = msg;
-	}
-	async function streamBitcoinPrice() {
-		const ws = new WebSocket('wss://ws.bitstamp.net');
-		ws.onmessage = (resp) => {
-			const evt = JSON.parse(resp.data);
-			if (evt['event'] == 'bts:request_reconnect') {
-				streamBitcoinPrice();
+		geoMe();
+	</script>
+	<script>
+		let priorsIndex = 0;
+		const priors = [];
+		function showBitcoinPrice(price) {
+			if (isNaN(price)) {
 				return;
 			}
-			const price = parseFloat(JSON.stringify(evt['data']['price']));
-			showBitcoinPrice(price);
+			priors[priorsIndex] = price;
+			priorsIndex += 1;
+			priorsIndex %= 32;
+			const priorAvg = priors.map((x,y,z)=>x/z.length).reduce((x,y)=>x+y);
+			let msg = '<span style="color: #f7931a;">Bitcoin: </span>'
+			const gap = price/1000;
+			if (price > priorAvg + gap) {
+				msg += '<span style="color: #0f0;">'
+			} else if (price < priorAvg - gap) {
+				msg += '<span style="color: #f00;">'
+			} else {
+				msg += '<span>'
+			}
+			msg += Intl.NumberFormat('en-US', {'currency': 'USD', 'style': 'currency'}).format(price);
+			msg += '</span>'
+			document.getElementById('bitcoin_info').innerHTML = msg;
 		}
-		ws.onclose = () => {
-			console.log('Bitcoin info socket closed.')
-			streamBitcoinPrice();
+		async function streamBitcoinPrice() {
+			const ws = new WebSocket('wss://ws.bitstamp.net');
+			ws.onmessage = (resp) => {
+				const evt = JSON.parse(resp.data);
+				if (evt['event'] == 'bts:request_reconnect') {
+					streamBitcoinPrice();
+					return;
+				}
+				const price = parseFloat(JSON.stringify(evt['data']['price']));
+				showBitcoinPrice(price);
+			}
+			ws.onclose = () => {
+				console.log('Bitcoin info socket closed.')
+				streamBitcoinPrice();
+			}
+			ws.onopen = async () => {
+				const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
+				ws.send(JSON.stringify(subMsg));
+				const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
+				const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
+				showBitcoinPrice(price);
+			}
+			return ws;
 		}
-		ws.onopen = async () => {
-			const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
-			ws.send(JSON.stringify(subMsg));
-			const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
-			const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
-			showBitcoinPrice(price);
+		streamBitcoinPrice();
+	</script>
+	<script>
+	function injectDancingBaby() {
+		/* Make the web great again. */
+		const baby = document.querySelector('#baby');
+		if (window.innerWidth < 1200) {
+			baby.style.display = 'none';
+			setTimeout(injectDancingBaby, 2000);
+			return;
 		}
-		return ws;
-	}
-	streamBitcoinPrice();
-</script>
-<script>
-function injectDancingBaby() {
-	/* Make the web great again. */
-	const baby = document.querySelector('#baby');
-	if (window.innerWidth < 1200) {
-		baby.innerHTML = '';
+		const x = Math.min(600, Math.floor(Math.random() * window.innerWidth / 2.0));
+		baby.style.right = `${x}px`;
+		baby.style.display = 'inline';
 		setTimeout(injectDancingBaby, 2000);
-		return;
 	}
-	const x = Math.min(800, Math.min(window.innerWidth/2, Math.floor(Math.random() * window.innerWidth)));
-	baby.innerHTML = `<img src="img/baby.gif" style="position: absolute; right: ${x}px; z-index: -1;">`;
-	setTimeout(injectDancingBaby, 2000);
-}
-injectDancingBaby();
-</script>
+	injectDancingBaby();
+	</script>
+</body>
 </html>
