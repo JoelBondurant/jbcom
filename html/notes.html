@@ -59,9 +59,13 @@ function setNoteList(noteList) {
 }
 function saveNote() {
 	const name = document.querySelector('#name').value;
+	if (name === null || name == '') {
+		return;
+	}
 	const note = document.querySelector('#note').value;
+	const ts = (new Date()).getTime().toString();
 	setNoteList(getNoteList().concat(name));
-	localStorage.setItem('note_' + name, note);
+	localStorage.setItem('note_' + name, JSON.stringify([note, ts]));
 }
 function deleteNote() {
 	const oname = document.querySelector('#name');
@@ -71,17 +75,17 @@ function deleteNote() {
 	}
 	localStorage.removeItem('note_' + name);
 	oname.value = '';
-	setNoteList(getNoteList().filter((x) => x != name));
 	document.querySelector('#note').value = '';
+	setNoteList(getNoteList().filter((x) => x != name));
 }
 function loadNote() {
 	const oname = document.querySelector('#name');
 	const name = oname.value;
-	var note;
+	let note;
 	if (name === null || name == '') {
-		note = JSON.parse(localStorage.getItem('note_list')).join('\n');
+		note = getNoteList().join('\n');
 	} else {
-		note = localStorage.getItem('note_' + name);
+		note = JSON.parse(localStorage.getItem('note_' + name))[0];
 	}
 	if (note === null) {
 		return;
@@ -122,6 +126,10 @@ function setEncryptionKey() {
 const rtc = new RTCPeerConnection();
 function setRemoteDescription() {
 	try {
+		const rdTxt = document.querySelector('#webrtc_follower_sdp').value;
+		if (rdTxt === null || rdTxt == '') {
+			return;
+		}
 		const rd = JSON.parse(document.querySelector('#webrtc_follower_sdp').value);
 		rtc.setRemoteDescription(rd);
 	} catch (ex) {
@@ -132,14 +140,20 @@ function setWebRTCLeaderSDP() {
 	const sdp0 = localStorage.getItem('webrtc_leader_sdp');
 	const dc = rtc.createDataChannel('channel');
 	rtc.dc = dc;
-	dc.onmessage = (evt) => console.log('Message: ' + evt.data);
-	dc.onopen = (evt) => console.log('RTC leader connection opened.');
+	dc.onmessage = (evt) => {
+		syncGossip(evt.data);
+		sendGossip();
+	}
+	dc.onopen = (evt) => {
+		console.log('RTC leader connection opened.');
+		sendGossip();
+	}
 	rtc.onicecandidate = (evt) => {
 		const sdp = JSON.stringify(rtc.localDescription);
 		document.querySelector('#webrtc_leader_sdp').value = sdp;
 		localStorage.setItem('webrtc_leader_sdp', sdp);
 	}
-	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('success'));
+	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('Success'));
 }
 function setWebRTCFollowerSDP() {
 	const lsdp = document.querySelector('#webrtc_leader_sdp');
@@ -154,25 +168,54 @@ function setWebRTCFollowerSDP() {
 		}
 		rtc.ondatachannel = (evt) => {
 			rtc.dc = evt.channel;
-			rtc.dc.onmessage = (evt) => console.log('New message: ' + evt.data);
+			rtc.dc.onmessage = (evt) => {
+				syncGossip(evt.data);
+				sendGossip();
+			}
 			rtc.dc.onopen = (evt) => console.log('Connection opened.');
 		}
-		rtc.setRemoteDescription(offer).then((evt) => console.log('offer set'));
-		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('answered'));
+		rtc.setRemoteDescription(offer).then((evt) => console.log('Offer set'));
+		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('Answered'));
 	} catch (ex) {
 		console.log(ex);
 		fsdp.value = '';
 		localStorage.setItem('webrtc_follower_sdp', '');
 	}
 }
-function setName() {
-	const name = document.querySelector('#name').value;
-	const note = localStorage.getItem('note_' + name);
-	rtc.dc.send(note);
+function getGossip() {
+	const notes = {};
+	const noteList = getNoteList();
+	for (const name of noteList) {
+		notes[name] = JSON.parse(localStorage.getItem(`note_${name}`));
+	}
+	return notes;
 }
-function setNote() {
-	const note = document.querySelector('#note').value;
-	rtc.dc.send(note);
+let gossipCount = 0;
+function sendGossip() {
+	if (gossipCount > 1) {
+		return;
+	}
+	rtc.dc.send(JSON.stringify(getGossip()));
+	gossipCount += 1;
+}
+function syncGossip(gossipEvent) {
+	const notes = getGossip();
+	const notes2 = JSON.parse(gossipEvent);
+	for (const [k,v] of Object.entries(notes2)) {
+		if (k in notes) {
+			const ts1 = notes[k][1];
+			const ts2 = v[1];
+			if (ts2 > ts1) {
+				note[k] = v;
+			}
+		} else {
+			notes[k] = v;
+		}
+	}
+	for (const [k, v] of Object.entries(notes)) {
+		setNoteList(getNoteList().concat(`${k}`));
+		localStorage.setItem(`note_${k}`, JSON.stringify(v));
+	}
 }
 </script>
 </html>
