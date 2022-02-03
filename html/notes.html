@@ -123,7 +123,15 @@ function setIsLeader() {
 function setEncryptionKey() {
 	localStorage.setItem('encryption_key', document.querySelector('#encryption_key').value);
 }
-const rtc = new RTCPeerConnection();
+const rtc = new RTCPeerConnection({
+	'iceServers': [
+		{
+			'urls': [
+				'stun:stun4.l.google.com:19302'
+			]
+		}
+	]
+});
 function setRemoteDescription() {
 	try {
 		const rdTxt = document.querySelector('#webrtc_follower_sdp').value;
