@@ -65,7 +65,7 @@ function saveNote() {
 	const note = document.querySelector('#note').value;
 	const ts = (new Date()).getTime().toString();
 	setNoteList(getNoteList().concat(name));
-	localStorage.setItem('note_' + name, JSON.stringify([note, ts]));
+	localStorage.setItem(`note_${name}`, JSON.stringify([note, ts]));
 }
 function deleteNote() {
 	const oname = document.querySelector('#name');
@@ -73,7 +73,7 @@ function deleteNote() {
 	if (name === null || name == '') {
 		return;
 	}
-	localStorage.removeItem('note_' + name);
+	localStorage.removeItem(`note_${name}`);
 	oname.value = '';
 	document.querySelector('#note').value = '';
 	setNoteList(getNoteList().filter((x) => x != name));
@@ -85,7 +85,7 @@ function loadNote() {
 	if (name === null || name == '') {
 		note = getNoteList().join('\n');
 	} else {
-		note = JSON.parse(localStorage.getItem('note_' + name))[0];
+		note = JSON.parse(localStorage.getItem(`note_${name}`))[0];
 	}
 	if (note === null) {
 		return;
@@ -145,7 +145,7 @@ function setWebRTCLeaderSDP() {
 		sendGossip();
 	}
 	dc.onopen = (evt) => {
-		console.log('RTC leader connection opened.');
+		console.log('WebRTC leader connection opened.');
 		sendGossip();
 	}
 	rtc.onicecandidate = (evt) => {
@@ -153,7 +153,7 @@ function setWebRTCLeaderSDP() {
 		document.querySelector('#webrtc_leader_sdp').value = sdp;
 		localStorage.setItem('webrtc_leader_sdp', sdp);
 	}
-	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('Success'));
+	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('WebRTC leader SDP created.'));
 }
 function setWebRTCFollowerSDP() {
 	const lsdp = document.querySelector('#webrtc_leader_sdp');
@@ -172,10 +172,10 @@ function setWebRTCFollowerSDP() {
 				syncGossip(evt.data);
 				sendGossip();
 			}
-			rtc.dc.onopen = (evt) => console.log('Connection opened.');
+			rtc.dc.onopen = (evt) => console.log('WebRTC follower connection opened.');
 		}
-		rtc.setRemoteDescription(offer).then((evt) => console.log('Offer set'));
-		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('Answered'));
+		rtc.setRemoteDescription(offer).then((evt) => console.log('WebRTC leader SDP offer accepted.'));
+		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('WebRTC follower SDP created.'));
 	} catch (ex) {
 		console.log(ex);
 		fsdp.value = '';
@@ -206,15 +206,15 @@ function syncGossip(gossipEvent) {
 			const ts1 = notes[k][1];
 			const ts2 = v[1];
 			if (ts2 > ts1) {
+				console.log(`WebRTC sync status: update note: ${k}`);
 				note[k] = v;
+				localStorage.setItem(`note_${k}`, JSON.stringify(v));
 			}
 		} else {
-			notes[k] = v;
+			console.log(`WebRTC sync status: new note: ${k}`)
+			setNoteList(getNoteList().concat(`${k}`));
+			localStorage.setItem(`note_${k}`, JSON.stringify(v));
 		}
-	}
-	for (const [k, v] of Object.entries(notes)) {
-		setNoteList(getNoteList().concat(`${k}`));
-		localStorage.setItem(`note_${k}`, JSON.stringify(v));
 	}
 }
 </script>
