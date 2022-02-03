@@ -207,7 +207,6 @@ function syncGossip(gossipEvent) {
 			const ts2 = v[1];
 			if (ts2 > ts1) {
 				console.log(`WebRTC sync status: update note: ${k}`);
-				note[k] = v;
 				localStorage.setItem(`note_${k}`, JSON.stringify(v));
 			}
 		} else {
