@@ -8,7 +8,7 @@
 	<style>
 		.smoltxt {
 			color: #888;
-			font-size: 1.3vh;
+			font-size: 1.5vh;
 			float: left;
 		}
 	</style>
@@ -33,16 +33,16 @@
 					<li><a href="notes">Notes</a></li>
 				</ul>
 		</div>
-		<br/>
+		<div style="display: flex; height: 2em;">&nbsp;</div>
 		<div style="display:grid; grid-template-columns: auto 1fr;">
+			<div>
+				<img id="baby" src="img/baby.gif" alt="dancing baby" style="height: 6em; position: absolute; bottom: -1em; z-index: -1; display: none;">
+			</div>
 			<div style="display:grid; grid-template-columns: 1fr; min-width: 200px;">
 				<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
 				<div id="geo_info" class="smoltxt">&nbsp;</div>
-				<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
 				<div id="trace_info" class="smoltxt">&nbsp;</div>
-			</div>
-			<div>
-				<img id="baby" src="img/baby.gif" alt="dancing baby" style="position: absolute; z-index: -1; display: none;">
+				<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
 			</div>
 		</div>
 	</div>
@@ -66,9 +66,8 @@
 	</script>
 	<script>
 		async function traceMe() {
-			const traceUrl = 'https://www.cloudflare.com/cdn-cgi/trace';
+			const traceUrl = 'https://joelbondurant.com/trace';
 			let traceInfo = await (await fetch(traceUrl)).text();
-			traceInfo = traceInfo.split('\n').slice(2, -5).join('<br/>');
 			document.getElementById('trace_info').innerHTML = traceInfo;
 		}
 		traceMe();
@@ -140,12 +139,12 @@
 		function injectDancingBaby() {
 			/* Make the web great again. */
 			const baby = document.querySelector('#baby');
-			if (window.innerWidth < 1200) {
+			if (window.innerWidth < 1200 || window.innerHeight < 800) {
 				baby.style.display = 'none';
 				setTimeout(injectDancingBaby, 2000);
 				return;
 			}
-			const x = Math.min(600, Math.floor(Math.random() * window.innerWidth / 2.0));
+			const x = Math.min(400, Math.floor(Math.random() * window.innerWidth / 2.0));
 			baby.style.right = `${x}px`;
 			baby.style.display = 'inline';
 			setTimeout(injectDancingBaby, 2000);

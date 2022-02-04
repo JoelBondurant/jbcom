@@ -1,5 +1,7 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from typing import Optional
+
+from fastapi import FastAPI, Request, Header
+from fastapi.responses import HTMLResponse, ORJSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -33,3 +35,8 @@ async def get_notes(req: Request):
 async def get_calendly(req: Request):
 	return templates.TemplateResponse('calendly.html', {'request': req})
 
+@app.get('/trace', response_class=ORJSONResponse)
+async def get_trace(req: Request):
+	xforward = req.headers.get('X-Forwarded-For')
+	user_agent = req.headers.get('User-Agent')
+	return {'X-Forwarded-For': xforward, 'User-Agent': user_agent}
