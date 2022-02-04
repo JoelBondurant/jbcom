@@ -66,7 +66,8 @@
 	</script>
 	<script>
 		async function traceMe() {
-			const traceUrl = 'https://joelbondurant.com/trace';
+			let hostName = location.hostname;
+			const traceUrl = `https://${hostName}/trace`;
 			let traceInfo = await (await fetch(traceUrl)).text();
 			document.getElementById('trace_info').innerHTML = traceInfo;
 		}
@@ -74,10 +75,11 @@
 	</script>
 	<script>
 		function showGeo(position) {
-			const geoInfo = 'Latitude, Loingitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
+			const geoInfo = 'Latitude, Longitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
 			document.getElementById('geo_info').innerHTML = geoInfo;
 		}
 		function geoMe() {
+			/* FOR DISPLAY ONLY */
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
 				navigator.geolocation.watchPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
@@ -121,25 +123,29 @@
 				showBitcoinPrice(price);
 			}
 			ws.onclose = () => {
-				console.log('Bitcoin info socket closed.')
+				console.log('Bitcoin price socket closed.')
 				streamBitcoinPrice();
 			}
 			ws.onopen = async () => {
 				const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
 				ws.send(JSON.stringify(subMsg));
-				const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
-				const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
-				showBitcoinPrice(price);
 			}
 			return ws;
 		}
-		streamBitcoinPrice();
+		async function pollBitcoinPrice() {
+			const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
+			const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
+			showBitcoinPrice(price);
+			setTimeout(pollBitcoinPrice, 10*60*1000);
+		}
+		pollBitcoinPrice(); // 200ms latency
+		streamBitcoinPrice(); // 2000ms latency
 	</script>
 	<script>
 		function injectDancingBaby() {
-			/* Make the web great again. */
 			const baby = document.querySelector('#baby');
 			if (window.innerWidth < 1200 || window.innerHeight < 800) {
+				/* Make the web great again. */
 				baby.style.display = 'none';
 				setTimeout(injectDancingBaby, 2000);
 				return;
