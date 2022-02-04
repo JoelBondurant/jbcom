@@ -135,23 +135,22 @@
 			const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
 			const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
 			showBitcoinPrice(price);
-			setTimeout(pollBitcoinPrice, 10*60*1000);
+			setTimeout(pollBitcoinPrice, 2*60*1000);
 		}
 		pollBitcoinPrice(); // 200ms latency
 		streamBitcoinPrice(); // 2000ms latency
 	</script>
 	<script>
 		function injectDancingBaby() {
+			/* Make the web great again. */
 			const baby = document.querySelector('#baby');
 			if (window.innerWidth < 1200 || window.innerHeight < 800) {
-				/* Make the web great again. */
 				baby.style.display = 'none';
-				setTimeout(injectDancingBaby, 2000);
-				return;
+			} else {
+				const x = Math.min(400, Math.floor(Math.random() * window.innerWidth / 2.0));
+				baby.style.right = `${x}px`;
+				baby.style.display = 'inline';
 			}
-			const x = Math.min(400, Math.floor(Math.random() * window.innerWidth / 2.0));
-			baby.style.right = `${x}px`;
-			baby.style.display = 'inline';
 			setTimeout(injectDancingBaby, 2000);
 		}
 		injectDancingBaby();

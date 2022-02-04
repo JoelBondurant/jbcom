@@ -37,6 +37,7 @@ async def get_calendly(req: Request):
 
 @app.get('/trace', response_class=ORJSONResponse)
 async def get_trace(req: Request):
-	xforward = req.headers.get('X-Forwarded-For')
-	user_agent = req.headers.get('User-Agent')
-	return {'X-Forwarded-For': xforward, 'User-Agent': user_agent}
+	return {
+		'X-Forwarded-For': req.headers.get('X-Forwarded-For'),
+		'User-Agent': req.headers.get('User-Agent'),
+	}
