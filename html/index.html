@@ -39,8 +39,8 @@
 				<img id="baby" src="img/baby.gif" alt="dancing baby" style="height: 6em; position: absolute; bottom: -1em; z-index: -1; display: none;">
 			</div>
 			<div style="display:grid; grid-template-columns: 1fr; min-width: 200px;">
-				<div id="bitcoin_info" class="smoltxt">&nbsp;</div>
-				<div id="geo_info" class="smoltxt">&nbsp;</div>
+				<div id="bitcoin_info" class="smoltxt">Bitcoin:</div>
+				<div id="geo_info" class="smoltxt">Latitude, Longitude:</div>
 				<div id="trace_info" class="smoltxt">&nbsp;</div>
 				<div id="apidocs" class="smoltxt"><a href="redoc">api docs</a></div>
 			</div>
@@ -66,8 +66,8 @@
 	</script>
 	<script>
 		async function traceMe() {
-			const traceUrl = `${origin}/trace`;
-			let traceInfo = await (await fetch(traceUrl)).text();
+			let traceInfo = await (await fetch(`${origin}/trace`)).json();
+			traceInfo = JSON.stringify(traceInfo, null, '\t').replaceAll('\n', '<br/>').slice(7,-1);
 			document.getElementById('trace_info').innerHTML = traceInfo;
 		}
 		traceMe();
