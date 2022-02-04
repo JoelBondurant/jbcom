@@ -66,8 +66,7 @@
 	</script>
 	<script>
 		async function traceMe() {
-			let hostName = location.hostname;
-			const traceUrl = `https://${hostName}/trace`;
+			const traceUrl = `${origin}/trace`;
 			let traceInfo = await (await fetch(traceUrl)).text();
 			document.getElementById('trace_info').innerHTML = traceInfo;
 		}
