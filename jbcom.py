@@ -55,6 +55,10 @@ async def get_notes(req: Request):
 async def get_calendly(req: Request):
 	return templates.TemplateResponse('calendly.html', {'request': req})
 
+@app.get('/blog', response_class=HTMLResponse)
+async def get_blog(req: Request):
+	return templates.TemplateResponse('blog.html', {'request': req})
+
 @app.get('/trace', response_class=ORJSONResponse)
 async def get_trace(req: Request):
 	resp = {
