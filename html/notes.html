@@ -124,11 +124,7 @@ function setEncryptionKey() {
 	localStorage.setItem('encryption_key', document.querySelector('#encryption_key').value);
 }
 const rtc = new RTCPeerConnection({
-	'iceServers': [
-		{
-			'urls': []
-		}
-	]
+	'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]
 });
 function setRemoteDescription() {
 	try {
