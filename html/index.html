@@ -9,7 +9,7 @@
 	</style>
 </head>
 <body>
-	<div id="backstuff" style="height: 100%; width: 100%;">
+	<div id="backstuff" style="height: 99%; width: 99%;">
 		<img src="img/joel.jpg" alt="Joel Bondurant" style="width: 16vh; height: auto; display: block; margin: auto; clip-path: circle(); border: max(0.8vw,0.8vw); border-radius: 16vh; border-style: double; border-color: #096909;">
 		<div style="display: block; text-align: center; margin-left: 10px; margin-right: auto;">
 			<a href="https://www.howtopronounce.com/joel">Joel</a>&nbsp;<a href="https://www.howtopronounce.com/bondurant">Bondurant</a><br/>
@@ -32,7 +32,7 @@
 		<div style="display: flex; height: 2em;">&nbsp;</div>
 		<div style="display:grid; grid-template-columns: auto 1fr;">
 			<div>
-				<img id="baby" src="img/baby.gif" alt="dancing baby" style="height: 6em; position: absolute; bottom: -1em; z-index: -1; display: none;">
+				<img id="baby" src="img/baby.gif" alt="dancing baby" style="height: 6em; position: absolute; bottom: -0.8em; z-index: -1; opacity:0.6; filter:alpha(opacity=60); display: none;">
 			</div>
 			<div style="display:grid; grid-template-columns: 1fr; min-width: 200px;">
 				<div id="bitcoin_info" class="smoltxt">Bitcoin:</div>
@@ -144,7 +144,7 @@
 			if (window.innerWidth < 1200 || window.innerHeight < 800) {
 				baby.style.display = 'none';
 			} else {
-				const x = Math.min(400, Math.floor(Math.random() * window.innerWidth / 2.0));
+				const x = Math.max(100, Math.min(400, Math.floor(Math.random() * window.innerWidth / 2.0)));
 				baby.style.right = `${x}px`;
 				baby.style.display = 'inline';
 			}
