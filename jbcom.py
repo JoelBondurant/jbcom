@@ -41,7 +41,7 @@ async def get_index(req: Request):
 		'hit_counter': hit_counter
 	})
 
-@app.get('/resume', response_class=HTMLResponse)
+@app.get('/resume', response_class=HTMLResponse, include_in_schema=False)
 async def get_resume(req: Request):
 	return templates.TemplateResponse('resume.html', {'request': req})
 
@@ -53,7 +53,7 @@ async def get_photos(req: Request):
 async def get_notes(req: Request):
 	return templates.TemplateResponse('notes.html', {'request': req})
 
-@app.get('/calendly', response_class=HTMLResponse)
+@app.get('/calendly', response_class=HTMLResponse, include_in_schema=False)
 async def get_calendly(req: Request):
 	return templates.TemplateResponse('calendly.html', {'request': req})
 
