@@ -11,7 +11,7 @@ app_context = {}
 app = FastAPI()
 app_context['app'] = app
 
-tn = '7752256586'
+tn = 'share'
 app.mount(f'/{tn}', StaticFiles(directory=tn), name=tn)
 app.mount('/css', StaticFiles(directory='css'), name='css')
 app.mount('/js', StaticFiles(directory='js'), name='js')
