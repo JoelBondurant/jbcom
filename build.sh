@@ -1,7 +1,5 @@
-cargo build
-scp target/debug/jbcom root@zero:/home/jbcom/jbcom.deploy
-ssh root@zero systemctl stop jbcom
-ssh root@zero mv /home/jbcom/jbcom.deploy /home/jbcom/jbcom
-ssh root@zero setcap 'cap_net_bind_service=+ep' /home/jbcom/jbcom
-ssh root@zero systemctl status jbcom
+printf "jbcom build started...  %s\n" "$(date -u -Iseconds)"
+RUSTFLAGS="-C opt-level=z" cargo build --release
+./bind.sh
+printf "jbcom build finished.  %s\n" "$(date -u -Iseconds)"
 
