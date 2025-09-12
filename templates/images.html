@@ -6,7 +6,7 @@
     <title>Images</title>
     <style>
         :root {
-            --bg-color: #020617;
+            --bg-color: #020202;
             --text-color: #f1f5f9;
             --secondary-text-color: #94a3b8;
         }
@@ -23,13 +23,13 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            width: 100vw;
+            min-width: 100vh;
             overflow: hidden;
         }
 
         .container {
-            max-width: 90vw;
-            max-height: 90vh;
+            max-width: 96vw;
+            max-height: 96vh;
             width: fit-content;
             height: fit-content;
             text-align: center;
@@ -38,18 +38,6 @@
             align-items: center;
             justify-content: center;
             flex-grow: 1;
-        }
-
-        .heading {
-            font-size: 2.25rem;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 0.5rem;
-        }
-
-        .sub-heading {
-            color: var(--secondary-text-color);
-            margin-bottom: 2rem;
         }
 
         #viewer-container {
@@ -64,6 +52,7 @@
             flex-grow: 1;
             max-width: 100%;
             max-height: 100%;
+            background-color: #0a0a0a;
         }
 
         #current-image {
@@ -73,6 +62,26 @@
             height: auto;
             display: block;
             object-fit: contain;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #current-image.loading {
+            opacity: 0;
+        }
+
+        .loader {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #fff;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: none; /* Hidden by default */
+            animation: spin 1s linear infinite;
+        }
+
+        .loader.visible {
+            display: block;
         }
 
         .nav-text {
@@ -104,6 +113,11 @@
             margin-top: 1rem;
             color: var(--secondary-text-color);
         }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -119,6 +133,7 @@
         </div>
 
         <div id="viewer-container">
+            <div class="loader" id="loader"></div>
             <img id="current-image" src="" alt="Current Image">
             <span class="nav-text left-nav">&lt;</span>
             <span class="nav-text right-nav">&gt;</span>
@@ -132,10 +147,11 @@
             const currentImage = document.getElementById('current-image');
             const imageCounter = document.getElementById('image-counter');
             const viewerContainer = document.getElementById('viewer-container');
+            const loader = document.getElementById('loader');
 
-            // Get all image URLs from the hidden list
             const imageUrls = Array.from(document.querySelectorAll('#image-urls li')).map(li => li.textContent.trim());
             let currentIndex = 0;
+            let isLoading = false;
 
             const updateImage = () => {
                 if (imageUrls.length === 0) {
@@ -143,42 +159,63 @@
                     imageCounter.textContent = 'No images to display.';
                     return;
                 }
-                currentImage.src = imageUrls[currentIndex];
-                imageCounter.textContent = `${currentIndex + 1} of ${imageUrls.length}`;
+                if (isLoading) {
+                    return;
+                }
+                isLoading = true;
+
+                loader.classList.add('visible');
+                currentImage.classList.add('loading');
+                imageCounter.textContent = `Loading ${currentIndex + 1} of ${imageUrls.length}`;
+
+                const preloaderImage = new Image();
+                const targetIndex = currentIndex;
+
+                preloaderImage.onload = () => {
+                    if (targetIndex === currentIndex) {
+                        currentImage.src = imageUrls[targetIndex];
+                        currentImage.classList.remove('loading');
+                        loader.classList.remove('visible');
+                        imageCounter.textContent = `${currentIndex + 1} of ${imageUrls.length}`;
+                    }
+                    isLoading = false;
+                };
+
+                preloaderImage.onerror = () => {
+                    console.error(`Failed to load image at index ${targetIndex}: ${imageUrls[targetIndex]}`);
+                    currentImage.classList.remove('loading');
+                    loader.classList.remove('visible');
+                    imageCounter.textContent = `Error loading image ${currentIndex + 1}`;
+                    isLoading = false;
+                };
+
+                preloaderImage.src = imageUrls[targetIndex];
             };
 
-            // Main click handler
             viewerContainer.addEventListener('click', (event) => {
                 const rect = event.target.getBoundingClientRect();
                 const x = event.clientX - rect.left;
                 const width = rect.width;
 
                 if (x > width / 2) {
-                    // Right half: next image
                     currentIndex = (currentIndex + 1) % imageUrls.length;
                 } else {
-                    // Left half: previous image
                     currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
                 }
                 updateImage();
             });
 
-            // Key press handler for arrow keys
             document.addEventListener('keydown', (event) => {
                 if (imageUrls.length === 0) {
                     return;
                 }
-
                 if (event.key === 'ArrowRight') {
                     currentIndex = (currentIndex + 1) % imageUrls.length;
-                    updateImage();
                 } else if (event.key === 'ArrowLeft') {
                     currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
-                    updateImage();
                 }
+                updateImage();
             });
-
-            // Initialize the viewer with the first image
             updateImage();
         });
     </script>
