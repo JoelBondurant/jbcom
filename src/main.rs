@@ -1,15 +1,18 @@
+use askama::Template;
 use axum::{
     Router,
-    extract::State,
+    extract::{ConnectInfo, State},
     response::Html,
     routing::get,
     routing::get_service,
 };
 use axum_server::tls_rustls::RustlsConfig;
+use http::header::{HeaderName, HeaderValue};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tower_http::services::ServeDir;
+use tower_http::set_header::SetResponseHeaderLayer;
 
 #[derive(Clone)]
 struct AppState {
@@ -26,10 +29,16 @@ async fn main() {
     images.sort();
     println!("Images loaded: {}", images.len());
     let app_state = Arc::new(AppState { images: images });
+    let img_service = ServeDir::new("./img");
+    let cache_layer = SetResponseHeaderLayer::overriding(
+        HeaderName::from_static("cache-control"),
+        HeaderValue::from_static("public, max-age=6000"),
+    );
+    let cached_img_service = get_service(img_service).layer(cache_layer);
     let app = Router::new()
         .route("/", get(index_handler))
         .route("/images", get(img_handler))
-        .nest_service("/img", get_service(ServeDir::new("./img")))
+        .nest_service("/img", cached_img_service)
         .with_state(app_state);
     /*
     setcap 'cap_net_bind_service=+ep' jbcom
@@ -45,14 +54,24 @@ async fn main() {
 
     println!("jbcom listening on {}", addr);
     axum_server::bind_rustls(addr, config)
-        .serve(app.into_make_service())
+        .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .unwrap();
 }
 
-async fn index_handler() -> Html<&'static str> {
+#[derive(Template)]
+#[template(path = "index.html")]
+struct IndexTemplate<'a> {
+    ip_address: &'a str,
+}
+
+async fn index_handler(ConnectInfo(addr): ConnectInfo<SocketAddr>) -> Html<String> {
     Html(
-        "<html><body style='background-color:black; color:white;'><h1>Rewriting in Rust...</h1></body></html>",
+        IndexTemplate {
+            ip_address: &addr.ip().to_string(),
+        }
+        .render()
+        .unwrap(),
     )
 }
 
@@ -64,8 +83,6 @@ async fn img_handler(State(app_state): State<Arc<AppState>>) -> Html<String> {
         .map(|im| template.replace("{}", im))
         .collect::<Vec<String>>()
         .join("</br>\n");
-    Html(
-        "<html><body style='background-color:black; color:white;'>{}</body></html>"
-            .replace("{}", &images),
-    )
+    let body_template = "<html><body style='background-color:black; color:white;'>{}</body></html>";
+    Html(body_template.replace("{}", &images))
 }
