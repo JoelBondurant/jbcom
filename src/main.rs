@@ -75,14 +75,18 @@ async fn index_handler(ConnectInfo(addr): ConnectInfo<SocketAddr>) -> Html<Strin
     )
 }
 
+#[derive(Template)]
+#[template(path = "images.html")]
+struct ImagesTemplate<'a> {
+    images: &'a Vec<String>,
+}
+
 async fn img_handler(State(app_state): State<Arc<AppState>>) -> Html<String> {
-    let template = "<a href=/img/{}>{}</a>";
-    let images = app_state
-        .images
-        .iter()
-        .map(|im| template.replace("{}", im))
-        .collect::<Vec<String>>()
-        .join("</br>\n");
-    let body_template = "<html><body style='background-color:black; color:white;'>{}</body></html>";
-    Html(body_template.replace("{}", &images))
+    Html(
+        ImagesTemplate {
+            images: &app_state.images,
+        }
+        .render()
+        .unwrap(),
+    )
 }
