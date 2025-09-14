@@ -1,5 +1,5 @@
 printf "jbcom started...  %s\n" "$(date -u -Iseconds)"
-./bind.sh
-sleep 2
+for i in {1..3}; do ./bind.sh && break || sleep 2; done
 #cargo watch -s "./bind.sh" -x run
-cargo run --release
+sleep 2
+./target/release/jbcom

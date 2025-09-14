@@ -38,6 +38,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(index_handler))
         .route("/images", get(img_handler))
+        .route("/resume", get(resume_handler))
         .nest_service("/img", cached_img_service)
         .with_state(app_state);
     /*
@@ -89,4 +90,13 @@ async fn img_handler(State(app_state): State<Arc<AppState>>) -> Html<String> {
         .render()
         .unwrap(),
     )
+}
+
+#[derive(Template)]
+#[template(path = "resume.html")]
+struct ResumeTemplate;
+
+async fn resume_handler() -> Html<String> {
+    let rt = ResumeTemplate;
+    Html(rt.render().unwrap())
 }

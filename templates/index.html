@@ -2,9 +2,38 @@
 <html>
 <head>
 	<title>joelbondurant.com</title>
+	<style>
+		.smoltxt {
+			color: #888;
+			font-size: 10px;
+			float: left;
+		}
+	</style>
 </head>
-<body style='background-color:black; color:white;'>
-	<h1>Rewriting in Rust...</h1>
-	<footer>ip_address: {{ ip_address }}</footer>
+<body style='background-color:#000; color:#fff;'>
+	<h4>Rewriting in Rust 🦀🦀🦀...</h4>
+	<hr/>
+	<br/>
+	<ul>
+		<li><a href="/images">Images</a></li>
+		<li><a href="/resume">Resume</a></li>
+	</ul>
+	<div style="display: flex; height: 2em;">&nbsp;</div>
+	<div class="smoltxt">IP Address: {{ ip_address }}</div></br>
+	<div id="geo_info" class="smoltxt">Latitude, Longitude:</div></br>
+	<script>
+		function showGeo(position) {
+			const geoInfo = 'Latitude, Longitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
+			document.getElementById('geo_info').innerHTML = geoInfo;
+		}
+		function geoMe() {
+			/* FOR DISPLAY ONLY */
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
+				navigator.geolocation.watchPosition(showGeo, x=>console.log(x), {'enableHighAccuracy': true});
+			}
+		}
+		geoMe();
+	</script>
 </body>
 </html>
