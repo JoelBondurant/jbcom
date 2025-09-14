@@ -18,9 +18,65 @@
 		<li><a href="/images">Images</a></li>
 		<li><a href="/resume">Resume</a></li>
 	</ul>
-	<div style="display: flex; height: 2em;">&nbsp;</div>
-	<div class="smoltxt">IP Address: {{ ip_address }}</div></br>
-	<div id="geo_info" class="smoltxt">Latitude, Longitude:</div></br>
+	<br/>
+	<div style="display: flex; height: 2em;">&nbsp;</div><br/>
+	<div id="bitcoin_info" class="smoltxt">Bitcoin:</div><br/>
+	<div class="smoltxt">IP Address: {{ ip_address }}</div><br/>
+	<div id="geo_info" class="smoltxt">Latitude, Longitude:</div><br/>
+	<script>
+		let priorsIndex = 0;
+		const priors = [];
+		function showBitcoinPrice(price) {
+			if (isNaN(price)) {
+				return;
+			}
+			priors[priorsIndex] = price;
+			priorsIndex += 1;
+			priorsIndex %= 64;
+			const priorAvg = priors.map((x,y,z)=>x/z.length).reduce((x,y)=>x+y);
+			let msg = '<span style="color: #f7931a;">Bitcoin: </span>'
+			const gap = price/1000;
+			if (price > priorAvg + gap) {
+				msg += '<span style="color: #0f0;">'
+			} else if (price < priorAvg - gap) {
+				msg += '<span style="color: #f00;">'
+			} else {
+				msg += '<span>'
+			}
+			msg += Intl.NumberFormat('en-US', {'currency': 'USD', 'style': 'currency'}).format(price);
+			msg += '</span>'
+			document.getElementById('bitcoin_info').innerHTML = msg;
+		}
+		async function streamBitcoinPrice() {
+			const ws = new WebSocket('wss://ws.bitstamp.net');
+			ws.onmessage = (resp) => {
+				const evt = JSON.parse(resp.data);
+				if (evt['event'] == 'bts:request_reconnect') {
+					streamBitcoinPrice();
+					return;
+				}
+				const price = parseFloat(JSON.stringify(evt['data']['price']));
+				showBitcoinPrice(price);
+			}
+			ws.onclose = () => {
+				console.log('Bitcoin price socket closed.')
+				streamBitcoinPrice();
+			}
+			ws.onopen = async () => {
+				const subMsg = {'event': 'bts:subscribe', 'data': {'channel': 'live_trades_btcusd'}};
+				ws.send(JSON.stringify(subMsg));
+			}
+			return ws;
+		}
+		async function pollBitcoinPrice() {
+			const spotUrl = 'https://api.coinbase.com/v2/prices/spot?currency=USD';
+			const price = parseFloat((await (await fetch(spotUrl)).json()).data.amount);
+			showBitcoinPrice(price);
+			setTimeout(pollBitcoinPrice, 2*60*1000);
+		}
+		pollBitcoinPrice(); // 200ms latency
+		streamBitcoinPrice(); // 2000ms latency
+	</script>
 	<script>
 		function showGeo(position) {
 			const geoInfo = 'Latitude, Longitude: (' + position.coords.latitude + ', ' + position.coords.longitude + ')';
