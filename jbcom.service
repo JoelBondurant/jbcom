@@ -3,13 +3,32 @@ Description=jbcom
 After=network.target
 
 [Service]
+# -- 1. Identity & Execution Context --
 User=me
 Group=me
-WorkingDirectory=/home/me/
-ExecStart=/home/me/jbcom
-AmbientCapabilities=CAP_NET_BIND_SERVICE
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+WorkingDirectory=/opt/jbcom
+ExecStart=/opt/jbcom/jbcom
+
+# -- 2. Privilege Management --
 NoNewPrivileges=true
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# -- 3. Filesystem Sandboxing --
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+StateDirectory=jbcom
+
+# -- 4. Kernel & Device Hardening --
+PrivateDevices=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+# -- 5. Reliability & Lifecycle --
 Restart=always
 RestartSec=8
 
