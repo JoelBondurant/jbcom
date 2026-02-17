@@ -16,30 +16,31 @@ use tower_http::set_header::SetResponseHeaderLayer;
 
 #[derive(Clone)]
 struct AppState {
-	images: Vec<String>,
+	photos: Vec<String>,
 }
 
 #[tokio::main]
 async fn main() {
 	println!("jbcom started.");
-	let mut images = std::fs::read_dir("./img")
-		.expect("img failure")
+	let mut photos = std::fs::read_dir("./photos")
+		.expect("photo loading failure")
 		.map(|x| x.unwrap().file_name().into_string().unwrap())
 		.collect::<Vec<String>>();
-	images.sort();
-	println!("Images loaded: {}", images.len());
-	let app_state = Arc::new(AppState { images });
-	let img_service = ServeDir::new("./img");
+	photos.sort();
+	println!("Photos loaded: {}", photos.len());
+	let app_state = Arc::new(AppState { photos });
+	let photo_service = ServeDir::new("./photos");
 	let cache_layer = SetResponseHeaderLayer::overriding(
 		HeaderName::from_static("cache-control"),
 		HeaderValue::from_static("public, max-age=6000"),
 	);
-	let cached_img_service = get_service(img_service).layer(cache_layer);
+	let cached_photo_service = get_service(photo_service).layer(cache_layer);
 	let app = Router::new()
 		.route("/", get(index_handler))
-		.route("/images", get(img_handler))
+		.route("/photos", get(photos_handler))
 		.route("/resume", get(resume_handler))
-		.nest_service("/img", cached_img_service)
+		.nest_service("/photo", cached_photo_service)
+		.nest_service("/static", ServeDir::new("static"))
 		.with_state(app_state);
 	/*
 	setcap 'cap_net_bind_service=+ep' jbcom
@@ -74,15 +75,15 @@ async fn index_handler(ConnectInfo(addr): ConnectInfo<SocketAddr>) -> Html<Strin
 }
 
 #[derive(Template)]
-#[template(path = "images.html")]
-struct ImagesTemplate<'a> {
-	images: &'a Vec<String>,
+#[template(path = "photos.html")]
+struct PhotosTemplate<'a> {
+	photos: &'a Vec<String>,
 }
 
-async fn img_handler(State(app_state): State<Arc<AppState>>) -> Html<String> {
+async fn photos_handler(State(app_state): State<Arc<AppState>>) -> Html<String> {
 	Html(
-		ImagesTemplate {
-			images: &app_state.images,
+		PhotosTemplate {
+			photos: &app_state.photos,
 		}
 		.render()
 		.unwrap(),

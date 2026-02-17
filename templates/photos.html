@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Images</title>
+{% include "header.html" %}
+    <title>Photos</title>
     <style>
         :root {
             --bg-color: #020202;
@@ -126,8 +122,8 @@
 
         <div id="image-urls" style="display: none;">
             <ul>
-                {% for img in images %}
-                <li>/img/{{ img }}</li>
+                {% for photo in photos %}
+                <li>/photo/{{ photo }}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -156,7 +152,7 @@
             const updateImage = () => {
                 if (imageUrls.length === 0) {
                     currentImage.src = '';
-                    imageCounter.textContent = 'No images to display.';
+                    imageCounter.textContent = 'No photos to display.';
                     return;
                 }
                 if (isLoading) {

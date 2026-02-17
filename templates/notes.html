@@ -1,0 +1,217 @@
+{% include "header.html" %}
+	<title>Notes</title>
+	<style>
+		@media print {
+			body {
+				color: #000;
+				background-color: #fff;
+			}
+		}
+	</style>
+	<script>
+		function copyProperty(query, property) {
+			const val = document.querySelector(query)[property];
+			navigator.clipboard.writeText(val);
+		}
+	</script>
+</head>
+<body>
+	<div>
+		<div style="display: grid; grid-template-columns: 1fr 10fr; max-width: 64em;">
+			<label for="encryption_key">encryption_key:</label>
+			<input id="encryption_key" type="password" onchange="setEncryptionKey();">
+			<label for="is_leader">is_leader:</label>
+			<input id="is_leader" type="checkbox" onchange="setIsLeader();">
+			<label for="webrtc_leader_sdp" onclick="copyProperty('#webrtc_leader_sdp', 'value');">webrtc_leader_sdp:</label>
+			<input id="webrtc_leader_sdp" type="text" onchange="setWebRTCFollowerSDP();">
+			<label for="webrtc_follower_sdp" onclick="copyProperty('#webrtc_follower_sdp', 'value');">webrtc_follower_sdp:</label>
+			<input id="webrtc_follower_sdp" type="text" onchange="setRemoteDescription();">
+			<label for="name">name:</label>
+			<input id="name" type="text">
+			<div></div>
+			<div style="display: grid; grid-template-columns: repeat(3, 1fr);">
+				<button id="load" onclick="loadNote();">load</button>
+				<button id="save" onclick="saveNote();">save</button>
+				<button id="delete" onclick="deleteNote();">delete</button>
+			</div>
+			<label for="note">note:</label>
+			<textarea id="note" style="height: 60vh;"></textarea>
+		</div>
+	</div>
+</body>
+<script>
+function getNoteList() {
+	let noteList = JSON.parse(localStorage.getItem('note_list'));
+	if (noteList === null) {
+		noteList = [];
+	}
+	return noteList;
+}
+function setNoteList(noteList) {
+	let modifiedNoteList  = Array.from(new Set(noteList.filter((x) => (x != '')))).sort();
+	localStorage.setItem('note_list', JSON.stringify(modifiedNoteList));
+	return modifiedNoteList;
+}
+function saveNote() {
+	const name = document.querySelector('#name').value;
+	if (name === null || name == '') {
+		return;
+	}
+	const note = document.querySelector('#note').value;
+	const ts = (new Date()).getTime().toString();
+	setNoteList(getNoteList().concat(name));
+	localStorage.setItem(`note_${name}`, JSON.stringify([note, ts]));
+}
+function deleteNote() {
+	const oname = document.querySelector('#name');
+	const name = oname.value;
+	if (name === null || name == '') {
+		return;
+	}
+	localStorage.removeItem(`note_${name}`);
+	oname.value = '';
+	document.querySelector('#note').value = '';
+	setNoteList(getNoteList().filter((x) => x != name));
+}
+function loadNote() {
+	const oname = document.querySelector('#name');
+	const name = oname.value;
+	let note;
+	if (name === null || name == '') {
+		note = getNoteList().join('\n');
+	} else {
+		note = JSON.parse(localStorage.getItem(`note_${name}`))[0];
+	}
+	if (note === null) {
+		return;
+	}
+	document.querySelector('#note').value = note;
+}
+function init() {
+	const encryptionKey = localStorage.getItem('encryption_key') || '';
+	const isLeader = (localStorage.getItem('is_leader') == 'true');
+	document.querySelector('#encryption_key').value = encryptionKey;
+	document.querySelector('#is_leader').checked = isLeader;
+	if (isLeader) {
+		document.querySelector('#webrtc_leader_sdp').disabled = true;
+		document.querySelector('#webrtc_follower_sdp').disabled = false;
+	} else {
+		document.querySelector('#webrtc_leader_sdp').disabled = false;
+		document.querySelector('#webrtc_follower_sdp').disabled = true;
+	}
+	if (isLeader) {
+		setTimeout(setWebRTCLeaderSDP, 300);
+	}
+}
+init();
+function setIsLeader() {
+	const isLeader = document.querySelector('#is_leader').checked;
+	localStorage.setItem('is_leader', isLeader);
+	if (isLeader) {
+		document.querySelector('#webrtc_leader_sdp').disabled = true;
+		document.querySelector('#webrtc_follower_sdp').disabled = false;
+	} else {
+		document.querySelector('#webrtc_leader_sdp').disabled = false;
+		document.querySelector('#webrtc_follower_sdp').disabled = true;
+	}
+}
+function setEncryptionKey() {
+	localStorage.setItem('encryption_key', document.querySelector('#encryption_key').value);
+}
+const rtc = new RTCPeerConnection({
+	'iceServers': [{'urls': 'stun:stun3.l.google.com:19302'}]
+});
+function setRemoteDescription() {
+	try {
+		const rdTxt = document.querySelector('#webrtc_follower_sdp').value;
+		if (rdTxt === null || rdTxt == '') {
+			return;
+		}
+		const rd = JSON.parse(document.querySelector('#webrtc_follower_sdp').value);
+		rtc.setRemoteDescription(rd);
+	} catch (ex) {
+		console.log(ex);
+	}
+}
+function setWebRTCLeaderSDP() {
+	const sdp0 = localStorage.getItem('webrtc_leader_sdp');
+	const dc = rtc.createDataChannel('channel');
+	rtc.dc = dc;
+	dc.onmessage = (evt) => {
+		syncGossip(evt.data);
+		sendGossip();
+	}
+	dc.onopen = (evt) => {
+		console.log('WebRTC leader connection opened.');
+		sendGossip();
+	}
+	rtc.onicecandidate = (evt) => {
+		const sdp = JSON.stringify(rtc.localDescription);
+		document.querySelector('#webrtc_leader_sdp').value = sdp;
+		localStorage.setItem('webrtc_leader_sdp', sdp);
+	}
+	rtc.createOffer().then((offer) => rtc.setLocalDescription(offer)).then((evt) => console.log('WebRTC leader SDP created.'));
+}
+function setWebRTCFollowerSDP() {
+	const lsdp = document.querySelector('#webrtc_leader_sdp');
+	const fsdp = document.querySelector('#webrtc_follower_sdp');
+	const leaderSDP = lsdp.value;
+	try {
+		const offer = JSON.parse(leaderSDP);
+		rtc.onicecandidate = (evt) => {
+			const sdp = JSON.stringify(rtc.localDescription);
+			fsdp.value = sdp;
+			localStorage.setItem('webrtc_follower_sdp', sdp);
+		}
+		rtc.ondatachannel = (evt) => {
+			rtc.dc = evt.channel;
+			rtc.dc.onmessage = (evt) => {
+				syncGossip(evt.data);
+				sendGossip();
+			}
+			rtc.dc.onopen = (evt) => console.log('WebRTC follower connection opened.');
+		}
+		rtc.setRemoteDescription(offer).then((evt) => console.log('WebRTC leader SDP offer accepted.'));
+		rtc.createAnswer().then(x => rtc.setLocalDescription(x)).then((x) => console.log('WebRTC follower SDP created.'));
+	} catch (ex) {
+		console.log(ex);
+		fsdp.value = '';
+		localStorage.setItem('webrtc_follower_sdp', '');
+	}
+}
+function getGossip() {
+	const notes = {};
+	const noteList = getNoteList();
+	for (const name of noteList) {
+		notes[name] = JSON.parse(localStorage.getItem(`note_${name}`));
+	}
+	return notes;
+}
+let gossipCount = 0;
+function sendGossip() {
+	if (gossipCount > 1) {
+		return;
+	}
+	rtc.dc.send(JSON.stringify(getGossip()));
+	gossipCount += 1;
+}
+function syncGossip(gossipEvent) {
+	const notes = getGossip();
+	const notes2 = JSON.parse(gossipEvent);
+	for (const [k,v] of Object.entries(notes2)) {
+		if (k in notes) {
+			const ts1 = notes[k][1];
+			const ts2 = v[1];
+			if (ts2 > ts1) {
+				console.log(`WebRTC sync status: update note: ${k}`);
+				localStorage.setItem(`note_${k}`, JSON.stringify(v));
+			}
+		} else {
+			console.log(`WebRTC sync status: new note: ${k}`)
+			setNoteList(getNoteList().concat(`${k}`));
+			localStorage.setItem(`note_${k}`, JSON.stringify(v));
+		}
+	}
+}
+</script>
+</html>

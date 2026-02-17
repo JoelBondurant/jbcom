@@ -1,28 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% include "header.html" %}
 	<title>joelbondurant.com</title>
-	<style>
-		.smoltxt {
-			color: #888;
-			font-size: 10px;
-			float: left;
-		}
-	</style>
 </head>
-<body style='background-color:#000; color:#fff;'>
-	<h4>Rewriting in Rust 🦀🦀🦀...</h4>
-	<hr/>
-	<br/>
-	<ul>
-		<li><a href="/images">Images</a></li>
-		<li><a href="/resume">Resume</a></li>
-	</ul>
-	<br/>
-	<div style="display: flex; height: 2em;">&nbsp;</div><br/>
-	<div id="bitcoin_info" class="smoltxt">Bitcoin:</div><br/>
-	<div class="smoltxt">IP Address: {{ ip_address }}</div><br/>
-	<div id="geo_info" class="smoltxt">Latitude, Longitude:</div><br/>
+<body>
+	<div id="backstuff" style="display: flex; flex-direction: column; min-height: 100vh;">
+		<img src="static/img/joel.jpg" alt="Joel Bondurant" style="width: 16vh; height: auto; display: block; margin: auto; clip-path: circle(); border: max(0.8vw,0.8vw); border-radius: 16vh; border-style: double; border-color: #096909;">
+		<hr/>
+		<br/>
+		<ul>
+			<li><a href="/resume">Resume</a></li>
+			<li><a href="https://github.com/JoelBondurant">GitHub</a></li>
+			<li><a href="/photos">Photos</a></li>
+		</ul>
+		<br/>
+		<div style="flex-grow: 1;"></div>
+		<br/>
+		<hr/>
+		<div id="bitcoin_info" class="smoltxt">Bitcoin:</div><br/>
+		<div class="smoltxt">IP Address: {{ ip_address }}</div><br/>
+		<div id="geo_info" class="smoltxt">Latitude, Longitude:</div><br/>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js" integrity="sha512-yNJzAsg5JyP91u+sLHlUDULMBd3hmEiVkYeeN1cQBKaLZ7EyT6oH2u5THNIRM2Fu6VKcZJv+F/QAp1h/qzy9Ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.waves.min.js" integrity="sha512-OctlSjhUW90StGtQUwB1125p1fNP4wKyCxJsNA4VNhlXEyP8ks0KAp2Cmesl53AWpo7rQQeWhnxa4v9ehQjetw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script>
+		VANTA.WAVES({
+			el: '#backstuff',
+			mouseControls: true,
+			touchControls: true,
+			gyroControls: false,
+			minHeight: 40.00,
+			minWidth: 40.00,
+			scale: 1.00,
+			scaleMobile: 1.00,
+			color: 0x0,
+			shininess: 40.00,
+			waveSpeed: 1.0,
+			zoom: 0.90
+		});
+	</script>
 	<script>
 		let priorsIndex = 0;
 		const priors = [];
