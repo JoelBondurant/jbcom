@@ -1,0 +1,11 @@
+[Unit]
+Description=jbcom
+After=network.target
+
+[Service]
+ExecStart=/home/me/jbcom
+Restart=always
+RestartSec=8
+
+[Install]
+WantedBy=default.target
