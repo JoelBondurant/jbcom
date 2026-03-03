@@ -1,219 +1,220 @@
 {% include "header.html" %}
-    <title>Photos</title>
-    <style>
-        :root {
-            --bg-color: #020202;
-            --text-color: #f1f5f9;
-            --secondary-text-color: #94a3b8;
-        }
+	<title>Photos</title>
+	<style>
+		:root {
+			--bg-color: #020202;
+			--text-color: #f1f5f9;
+			--secondary-text-color: #94a3b8;
+		}
 
-        body {
-            font-family: sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 2rem;
-            margin: 0;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            min-width: 100vh;
-            overflow: hidden;
-        }
+		body {
+			font-family: sans-serif;
+			background-color: var(--bg-color);
+			color: var(--text-color);
+			padding: 0.5rem;
+			margin: 0;
+			line-height: 1.6;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-height: 100vh;
+			overflow: hidden;
+		}
 
-        .container {
-            max-width: 96vw;
-            max-height: 96vh;
-            width: fit-content;
-            height: fit-content;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-        }
+		.container {
+			max-width: 99vw;
+			max-height: 99vh;
+			min-width: 98vw;
+			min-height: 98vh;
+			width: fit-content;
+			height: fit-content;
+			text-align: center;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			flex-grow: 1;
+		}
 
-        #viewer-container {
-            position: relative;
-            cursor: pointer;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-radius: 0.5rem;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            max-width: 100%;
-            max-height: 100%;
-            background-color: #0a0a0a;
-        }
+		#viewer-container {
+			position: relative;
+			cursor: pointer;
+			box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+			border-radius: 0.5rem;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-grow: 1;
+			max-width: 100%;
+			max-height: 100%;
+			background-color: #0a0a0a;
+		}
 
-        #current-image {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            display: block;
-            object-fit: contain;
-            transition: opacity 0.3s ease-in-out;
-        }
+		#current-image {
+			max-width: 100%;
+			max-height: 100%;
+			width: auto;
+			height: auto;
+			display: block;
+			object-fit: contain;
+			transition: opacity 0.3s ease-in-out;
+		}
 
-        #current-image.loading {
-            opacity: 0;
-        }
+		#current-image.loading {
+			opacity: 0;
+		}
 
-        .loader {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border: 5px solid #fff;
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            display: none; /* Hidden by default */
-            animation: spin 1s linear infinite;
-        }
+		.loader {
+			position: absolute;
+			width: 50px;
+			height: 50px;
+			border: 5px solid #fff;
+			border-bottom-color: transparent;
+			border-radius: 50%;
+			display: none; /* Hidden by default */
+			animation: spin 1s linear infinite;
+		}
 
-        .loader.visible {
-            display: block;
-        }
+		.loader.visible {
+			display: block;
+		}
 
-        .nav-text {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.5rem;
-            font-weight: bold;
-            pointer-events: none;
-            user-select: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
+		.nav-text {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			color: rgba(255, 255, 255, 0.7);
+			font-size: 1.5rem;
+			font-weight: bold;
+			pointer-events: none;
+			user-select: none;
+			opacity: 0;
+			transition: opacity 0.2s;
+		}
 
-        #viewer-container:hover .nav-text {
-            opacity: 1;
-        }
+		#viewer-container:hover .nav-text {
+			opacity: 1;
+		}
 
-        .left-nav {
-            left: 2rem;
-        }
+		.left-nav {
+			left: 2rem;
+		}
 
-        .right-nav {
-            right: 2rem;
-        }
+		.right-nav {
+			right: 2rem;
+		}
 
-        .image-counter {
-            margin-top: 1rem;
-            color: var(--secondary-text-color);
-        }
+		.image-counter {
+			margin-top: 1rem;
+			color: var(--secondary-text-color);
+		}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+	</style>
 </head>
 <body>
 
-    <div class="container">
+	<div class="container">
 
-        <div id="image-urls" style="display: none;">
-            <ul>
-                {% for photo in photos %}
-                <li>/photo/{{ photo }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+		<div id="image-urls" style="display: none;">
+			<ul>
+				{% for photo in photos %}
+				<li>/photo/{{ photo }}</li>
+				{% endfor %}
+			</ul>
+		</div>
 
-        <div id="viewer-container">
-            <div class="loader" id="loader"></div>
-            <img id="current-image" src="" alt="Current Image">
-            <span class="nav-text left-nav">&lt;</span>
-            <span class="nav-text right-nav">&gt;</span>
-        </div>
+		<div id="viewer-container">
+			<div class="loader" id="loader"></div>
+			<img id="current-image" src="" alt="Current Image">
+			<span class="nav-text left-nav">&lt;</span>
+			<span class="nav-text right-nav">&gt;</span>
+		</div>
 
-        <p id="image-counter" class="image-counter"></p>
-    </div>
+		<p id="image-counter" class="image-counter"></p>
+	</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentImage = document.getElementById('current-image');
-            const imageCounter = document.getElementById('image-counter');
-            const viewerContainer = document.getElementById('viewer-container');
-            const loader = document.getElementById('loader');
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const currentImage = document.getElementById('current-image');
+			const imageCounter = document.getElementById('image-counter');
+			const viewerContainer = document.getElementById('viewer-container');
+			const loader = document.getElementById('loader');
 
-            const imageUrls = Array.from(document.querySelectorAll('#image-urls li')).map(li => li.textContent.trim());
-            let currentIndex = 0;
-            let isLoading = false;
+			const imageUrls = Array.from(document.querySelectorAll('#image-urls li')).map(li => li.textContent.trim());
+			let currentIndex = 0;
+			let isLoading = false;
 
-            const updateImage = () => {
-                if (imageUrls.length === 0) {
-                    currentImage.src = '';
-                    imageCounter.textContent = 'No photos to display.';
-                    return;
-                }
-                if (isLoading) {
-                    return;
-                }
-                isLoading = true;
+			const updateImage = () => {
+				if (imageUrls.length === 0) {
+					currentImage.src = '';
+					imageCounter.textContent = 'No photos to display.';
+					return;
+				}
+				if (isLoading) {
+					return;
+				}
+				isLoading = true;
 
-                loader.classList.add('visible');
-                currentImage.classList.add('loading');
-                imageCounter.textContent = `Loading ${currentIndex + 1} of ${imageUrls.length}`;
+				loader.classList.add('visible');
+				currentImage.classList.add('loading');
+				imageCounter.textContent = `Loading ${currentIndex + 1} of ${imageUrls.length}`;
 
-                const preloaderImage = new Image();
-                const targetIndex = currentIndex;
+				const preloaderImage = new Image();
+				const targetIndex = currentIndex;
 
-                preloaderImage.onload = () => {
-                    if (targetIndex === currentIndex) {
-                        currentImage.src = imageUrls[targetIndex];
-                        currentImage.classList.remove('loading');
-                        loader.classList.remove('visible');
-                        imageCounter.textContent = `${currentIndex + 1} of ${imageUrls.length}`;
-                    }
-                    isLoading = false;
-                };
+				preloaderImage.onload = () => {
+					if (targetIndex === currentIndex) {
+						currentImage.src = imageUrls[targetIndex];
+						currentImage.classList.remove('loading');
+						loader.classList.remove('visible');
+						imageCounter.textContent = `${currentIndex + 1} of ${imageUrls.length}`;
+					}
+					isLoading = false;
+				};
 
-                preloaderImage.onerror = () => {
-                    console.error(`Failed to load image at index ${targetIndex}: ${imageUrls[targetIndex]}`);
-                    currentImage.classList.remove('loading');
-                    loader.classList.remove('visible');
-                    imageCounter.textContent = `Error loading image ${currentIndex + 1}`;
-                    isLoading = false;
-                };
+				preloaderImage.onerror = () => {
+					console.error(`Failed to load image at index ${targetIndex}: ${imageUrls[targetIndex]}`);
+					currentImage.classList.remove('loading');
+					loader.classList.remove('visible');
+					imageCounter.textContent = `Error loading image ${currentIndex + 1}`;
+					isLoading = false;
+				};
 
-                preloaderImage.src = imageUrls[targetIndex];
-            };
+				preloaderImage.src = imageUrls[targetIndex];
+			};
 
-            viewerContainer.addEventListener('click', (event) => {
-                const rect = event.target.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const width = rect.width;
+			viewerContainer.addEventListener('click', (event) => {
+				const rect = event.target.getBoundingClientRect();
+				const x = event.clientX - rect.left;
+				const width = rect.width;
 
-                if (x > width / 2) {
-                    currentIndex = (currentIndex + 1) % imageUrls.length;
-                } else {
-                    currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
-                }
-                updateImage();
-            });
+				if (x > width / 2) {
+					currentIndex = (currentIndex + 1) % imageUrls.length;
+				} else {
+					currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+				}
+				updateImage();
+			});
 
-            document.addEventListener('keydown', (event) => {
-                if (imageUrls.length === 0) {
-                    return;
-                }
-                if (event.key === 'ArrowRight') {
-                    currentIndex = (currentIndex + 1) % imageUrls.length;
-                } else if (event.key === 'ArrowLeft') {
-                    currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
-                }
-                updateImage();
-            });
-            updateImage();
-        });
-    </script>
+			document.addEventListener('keydown', (event) => {
+				if (imageUrls.length === 0) {
+					return;
+				}
+				if (event.key === 'ArrowRight') {
+					currentIndex = (currentIndex + 1) % imageUrls.length;
+				} else if (event.key === 'ArrowLeft') {
+					currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+				}
+				updateImage();
+			});
+			updateImage();
+		});
+	</script>
 </body>
 </html>
